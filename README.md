@@ -50,7 +50,7 @@ The plugin sends data to external services **only when a teacher or the administ
 The server needs outbound HTTPS access to the services in use. The plugin stores temporary drafts in the user's own file area (deleted after saving, discarding or 24 hours) and a log of generation jobs; both are covered by the Moodle privacy API (export and deletion).
 
 ## Documentation
-A detailed manual in Spanish (deployment requirements, configuration, usage and release notes) is in `README_es.md`.
+Change history: `CHANGELOG.md`. A detailed manual in Spanish (deployment requirements, configuration, usage and release notes) is in `README_es.md`.
 
 ## Bug reports
 Please use the issue tracker of the repository: https://github.com/ghostyared/Moodle_CoursePlugin/issues
