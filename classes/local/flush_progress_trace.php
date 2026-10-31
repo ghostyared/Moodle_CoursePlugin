@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
  * page while the AI writes a topic. This trace flushes each step so the progress is visible.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class flush_progress_trace extends \progress_trace {

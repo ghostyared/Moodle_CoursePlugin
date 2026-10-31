@@ -17,7 +17,7 @@
  * Progress trace of a background job: stores each step in the database and stops on cancel.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

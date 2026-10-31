@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
  * in any theme and survive when the teacher edits them.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class html_builder {

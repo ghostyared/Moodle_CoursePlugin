@@ -22,7 +22,7 @@
  * parent section tells the teacher which section is inside which one.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

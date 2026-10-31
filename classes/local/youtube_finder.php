@@ -27,7 +27,7 @@ require_once($CFG->libdir . '/filelib.php');
  * Videos are searched with the official API and never invented by the AI, so the links always exist.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class youtube_finder {

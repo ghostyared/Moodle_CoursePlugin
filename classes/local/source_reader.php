@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
  * vision model: smaller images cost fewer tokens and are easier for the model to read.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class source_reader {

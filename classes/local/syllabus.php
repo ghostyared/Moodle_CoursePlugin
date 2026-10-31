@@ -29,7 +29,7 @@ require_once($CFG->dirroot . '/course/modlib.php');
  * plugin only rewrites it when the topics are saved or generated again.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class syllabus {

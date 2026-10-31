@@ -18,7 +18,7 @@
  * English language strings for local_ai_yared_course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,6 +34,11 @@ $string['privacy:metadata:aiprovider:questions'] = 'The topics, stems and extra 
 $string['privacy:metadata:aiprovider:files'] = 'The PDFs and images the teacher uploads to import questions.';
 $string['privacy:metadata:youtube'] = 'YouTube receives a search query to find a support video.';
 $string['privacy:metadata:youtube:query'] = 'Search words derived from the topic title.';
+$string['privacy:metadata:wikimediacommons'] = 'Wikimedia Commons receives a search query to find a free reference picture, only when the teacher uses the reference picture search. The chosen picture is downloaded from upload.wikimedia.org.';
+$string['privacy:metadata:wikimediacommons:query'] = 'Search words typed by the teacher or deduced from the question text.';
+$string['privacy:metadata:crmwebhook'] = 'The CRM webhook URL configured by the administrator receives a signed notification when a course build finishes. No personal data of users is sent.';
+$string['privacy:metadata:crmwebhook:status'] = 'Build identifier, CRM reference, status and error text of the course build.';
+$string['privacy:metadata:crmwebhook:courseurl'] = 'Course identifier and URL of the created course.';
 $string['privacy:metadata:files'] = 'Pending PDF and image question imports (source files, crops and review data) are kept in the teacher\'s own file area until they are saved, discarded or expire after 24 hours.';
 $string['privacy:importpath'] = 'Pending question imports';
 $string['task_cleanup_imports'] = 'Delete abandoned question imports';

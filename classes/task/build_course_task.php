@@ -34,7 +34,7 @@ defined('MOODLE_INTERNAL') || die();
  * generate the material, so the service account never needs permission to create activities or questions.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class build_course_task extends \core\task\adhoc_task {

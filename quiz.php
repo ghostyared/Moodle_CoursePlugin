@@ -18,7 +18,7 @@
  * Quiz wizard: create a standard Moodle quiz from one or more question banks.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

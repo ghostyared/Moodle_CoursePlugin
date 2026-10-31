@@ -18,7 +18,7 @@
  * Upgrade steps for local_ai_yared_course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -451,6 +451,12 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         // 0.24.0: optional reference picture from Wikimedia Commons in the review screen (search, choose, "process and
         // rewrite"); the credit is added to the feedback when saving. New admin setting "imagesearch". No schema change.
         upgrade_plugin_savepoint(true, 2026102703, 'local', 'ai_yared_course');
+    }
+
+    if ($oldversion < 2026103001) {
+        // 0.24.1: plugin directory review fixes (LICENSE file, privacy declarations for Wikimedia Commons and the CRM
+        // webhook, English README, copyright headers). No functional or schema change.
+        upgrade_plugin_savepoint(true, 2026103001, 'local', 'ai_yared_course');
     }
 
     return true;

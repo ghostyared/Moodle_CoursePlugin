@@ -26,7 +26,7 @@ defined('MOODLE_INTERNAL') || die();
  * falls back to sending the PDF directly to Gemini, which keeps the text but cannot crop figures.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class pdf_renderer {

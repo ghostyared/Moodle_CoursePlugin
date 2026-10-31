@@ -18,7 +18,7 @@
  * Privacy provider for local_ai_yared_course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -59,6 +59,18 @@ class provider implements
         $collection->add_external_location_link('youtube', [
             'query' => 'privacy:metadata:youtube:query',
         ], 'privacy:metadata:youtube');
+
+        // Wikimedia Commons: only the search words typed by the teacher (or deduced by the AI from the question) are sent;
+        // no personal data. The chosen picture is downloaded from upload.wikimedia.org.
+        $collection->add_external_location_link('wikimediacommons', [
+            'query' => 'privacy:metadata:wikimediacommons:query',
+        ], 'privacy:metadata:wikimediacommons');
+
+        // CRM webhook configured by the administrator: build status notifications; no personal data of users is sent.
+        $collection->add_external_location_link('crmwebhook', [
+            'status' => 'privacy:metadata:crmwebhook:status',
+            'courseurl' => 'privacy:metadata:crmwebhook:courseurl',
+        ], 'privacy:metadata:crmwebhook');
 
         $collection->add_database_table('local_ai_yared_course_job', [
             'userid' => 'privacy:metadata:job:userid',

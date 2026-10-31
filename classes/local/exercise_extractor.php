@@ -25,7 +25,7 @@ defined('MOODLE_INTERNAL') || die();
  * boxes of the whole exercise and of its figure, so the caller can crop them.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class exercise_extractor {

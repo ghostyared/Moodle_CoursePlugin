@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * cron process and web request of the site.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class ai_guard {

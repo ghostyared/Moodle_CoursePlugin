@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
  * Shared parameter and return structures for the external API.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class api {

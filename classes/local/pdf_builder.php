@@ -25,7 +25,7 @@ require_once($CFG->libdir . '/pdflib.php');
  * Generates the class handout as a PDF with Moodle's bundled TCPDF.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class pdf_builder {

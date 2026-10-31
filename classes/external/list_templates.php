@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * External function: template courses the CRM may use.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class list_templates extends external_api {

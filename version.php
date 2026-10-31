@@ -18,14 +18,14 @@
  * Version information for local_ai_yared_course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'local_ai_yared_course';
-$plugin->version = 2026102703;
+$plugin->version = 2026103001;
 $plugin->requires = 2024100700; // Moodle 4.5.
 $plugin->maturity = MATURITY_BETA;
-$plugin->release = '0.24.0';
+$plugin->release = '0.24.1';

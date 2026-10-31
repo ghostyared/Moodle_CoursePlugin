@@ -22,7 +22,7 @@ defined('MOODLE_INTERNAL') || die();
  * Turns a designed topic (stored in local_ai_yared_course_topic) into a course section with its activities.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class topic_runner {

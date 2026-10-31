@@ -18,7 +18,7 @@
  * AI topic builder: asks for the section, the topics and what to create, then builds every topic.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
  * External function: create or update a topic of a course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class create_topic extends external_api {

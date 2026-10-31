@@ -37,7 +37,7 @@ defined('MOODLE_INTERNAL') || die();
  * crm_ref returns the existing build and never creates a second course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class build_course extends external_api {

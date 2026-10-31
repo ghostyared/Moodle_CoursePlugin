@@ -18,7 +18,7 @@
  * Spanish language strings for local_ai_yared_course.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -34,6 +34,11 @@ $string['privacy:metadata:aiprovider:questions'] = 'Los temas, enunciados e inst
 $string['privacy:metadata:aiprovider:files'] = 'Los PDF e imágenes que el docente sube para importar preguntas.';
 $string['privacy:metadata:youtube'] = 'YouTube recibe una consulta de búsqueda para encontrar un video de apoyo.';
 $string['privacy:metadata:youtube:query'] = 'Palabras de búsqueda derivadas del título del tema.';
+$string['privacy:metadata:wikimediacommons'] = 'Wikimedia Commons recibe unas palabras de búsqueda para encontrar una imagen de referencia libre, solo cuando el docente usa la búsqueda de imagen de referencia. La imagen elegida se descarga de upload.wikimedia.org.';
+$string['privacy:metadata:wikimediacommons:query'] = 'Palabras de búsqueda escritas por el docente o deducidas del texto de la pregunta.';
+$string['privacy:metadata:crmwebhook'] = 'La URL del webhook del CRM configurada por el administrador recibe una notificación firmada cuando termina la construcción de un curso. No se envían datos personales de usuarios.';
+$string['privacy:metadata:crmwebhook:status'] = 'Identificador de la construcción, referencia del CRM, estado y texto de error.';
+$string['privacy:metadata:crmwebhook:courseurl'] = 'Identificador y URL del curso creado.';
 $string['privacy:metadata:files'] = 'Las importaciones pendientes de preguntas desde PDF e imagen (archivos de origen, recortes y datos de revisión) se guardan en el área de archivos del propio docente hasta que se guardan, se descartan o vencen a las 24 horas.';
 $string['privacy:importpath'] = 'Importaciones de preguntas pendientes';
 $string['task_cleanup_imports'] = 'Eliminar importaciones de preguntas abandonadas';

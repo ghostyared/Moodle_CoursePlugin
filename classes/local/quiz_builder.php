@@ -34,7 +34,7 @@ require_once($CFG->libdir . '/questionlib.php');
  * mod_quiz activity that the teacher can edit with the standard quiz editor.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class quiz_builder {

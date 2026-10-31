@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * External function: update the class dates of the topics and republish the syllabus.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class update_syllabus extends external_api {

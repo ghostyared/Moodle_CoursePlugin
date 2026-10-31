@@ -32,7 +32,7 @@ defined('MOODLE_INTERNAL') || die();
  * - If the exercise has real mathematics, short symbols such as \(x\) or \(2\) stay as the AI wrote them.
  *
  * @package    local_ai_yared_course
- * @copyright  2026
+ * @copyright  2026 GhostYared Corp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class latex_cleaner {
