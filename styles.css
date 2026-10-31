@@ -1,0 +1,710 @@
+/* Waiting overlay for the question generator (bank.php). */
+.yared-bank-wait[hidden] {
+    display: none !important;
+}
+
+.yared-bank-wait {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.yared-bank-wait-card {
+    width: 100%;
+    max-width: 34rem;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+    text-align: center;
+}
+
+.yared-bank-wait-spinner {
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 1rem;
+    border: 0.35rem solid var(--bs-secondary-bg, #dee2e6);
+    border-top-color: var(--bs-primary, #0d6efd);
+    border-radius: 50%;
+    animation: yared-bank-spin 0.8s linear infinite;
+}
+
+.yared-bank-wait-message {
+    min-height: 3rem;
+    margin: 1rem 0 0.5rem;
+    font-weight: 600;
+}
+
+/* Generated question previews (math and images). */
+.aiyared-question-image {
+    max-width: 100%;
+    height: auto;
+    margin-top: 0.5rem;
+}
+
+.generaltable td .aiyared-question-image {
+    max-width: min(100%, 28rem);
+}
+
+.generaltable td .MathJax,
+.generaltable td mjx-container {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.yared-bank-wait-elapsed {
+    color: var(--bs-secondary-color, #6c757d);
+    font-variant-numeric: tabular-nums;
+}
+
+body.yared-bank-waiting {
+    overflow: hidden;
+}
+
+@keyframes yared-bank-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .yared-bank-wait-spinner {
+        animation: none;
+    }
+}
+
+/* PDF/image importer. */
+.aiyared-import-steps {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.aiyared-import-step {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 999px;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    font-size: 0.9rem;
+}
+
+.aiyared-import-step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    background: var(--bs-primary, #0d6efd);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.aiyared-import-entry {
+    border-left: 0.3rem solid var(--bs-primary, #0d6efd);
+}
+
+.aiyared-import-card {
+    border-left: 0.3rem solid var(--bs-primary, #0d6efd);
+}
+
+.aiyared-import-card .aiyared-import-image img {
+    width: 100%;
+    max-height: 22rem;
+    object-fit: contain;
+    background: #fff;
+}
+
+.aiyared-import-card .aiyared-import-image {
+    transition: opacity 0.15s ease-in-out;
+}
+
+.aiyared-import-options td {
+    vertical-align: middle;
+}
+
+.aiyared-import-options input[type="text"] {
+    min-width: 10rem;
+}
+
+.aiyared-import-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    padding: 0.5rem 0;
+    background: var(--bs-body-bg, #fff);
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.aiyared-import-form .form-label {
+    margin-bottom: 0.25rem;
+}
+
+/* Three ways to create questions (bank.php). */
+.aiyared-mode-intro {
+    max-width: 52rem;
+    margin-bottom: 1.25rem;
+}
+
+.aiyared-mode-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.aiyared-mode-card {
+    border-top: 0.3rem solid var(--bs-primary, #0d6efd);
+    transition: transform 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.aiyared-mode-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12);
+}
+
+.aiyared-mode-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-bottom: 0.75rem;
+    border-radius: 50%;
+    background: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #052c65);
+    font-size: 1.25rem;
+}
+
+.aiyared-mode-form-header {
+    margin-bottom: 1rem;
+}
+
+/* Crop editor for the PDF/image importer. */
+.aiyared-crop-dialog {
+    width: min(96vw, 72rem);
+    max-width: 96vw;
+    max-height: 94vh;
+    padding: 0;
+    border: 0;
+    border-radius: 0.75rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
+}
+
+.aiyared-crop-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+}
+
+.aiyared-crop-card {
+    padding: 1rem;
+    max-height: 92vh;
+    overflow: auto;
+}
+
+.aiyared-crop-stage {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    line-height: 0;
+    cursor: crosshair;
+    touch-action: none;
+    user-select: none;
+}
+
+.aiyared-crop-image {
+    display: block;
+    max-width: 100%;
+    max-height: 66vh;
+    width: auto;
+    height: auto;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.aiyared-crop-selection {
+    position: absolute;
+    box-sizing: border-box;
+    border: 2px solid var(--bs-primary, #0d6efd);
+    background: rgba(13, 110, 253, 0.16);
+    cursor: move;
+    touch-action: none;
+}
+
+.aiyared-crop-selection[hidden] {
+    display: none !important;
+}
+
+.aiyared-crop-handle {
+    position: absolute;
+    right: -0.45rem;
+    bottom: -0.45rem;
+    width: 0.9rem;
+    height: 0.9rem;
+    border: 2px solid var(--bs-primary, #0d6efd);
+    border-radius: 50%;
+    background: var(--bs-body-bg, #fff);
+    cursor: nwse-resize;
+}
+
+@media (max-width: 575.98px) {
+    .aiyared-crop-card {
+        padding: 0.75rem;
+    }
+
+    .aiyared-crop-image {
+        max-height: 58vh;
+    }
+}
+
+
+/* Selector cards (section choice). */
+.aiyared-choice {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    height: 100%;
+    margin: 0;
+    padding: 0.9rem 1rem;
+    border: 2px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.aiyared-choice:hover {
+    border-color: var(--bs-primary, #0d6efd);
+}
+
+.aiyared-choice:has(input:checked) {
+    border-color: var(--bs-primary, #0d6efd);
+    background: rgba(13, 110, 253, 0.07);
+}
+
+.aiyared-choice .aiyared-choice-input {
+    margin-top: 0.25rem;
+    flex: 0 0 auto;
+}
+
+.aiyared-choice-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.aiyared-choice-title {
+    font-weight: 600;
+}
+
+.aiyared-choice-desc {
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+/* ===== Importer review screen (0.19.2) ===== */
+.aiyared-import-form {
+    --aiyared-radius: 0.75rem;
+    --aiyared-border: var(--bs-border-color, #dee2e6);
+    --aiyared-soft: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+.aiyared-import-toolbar {
+    padding: 0.6rem 0.9rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--aiyared-border);
+    border-radius: var(--aiyared-radius);
+    background: var(--bs-body-bg, #fff);
+    box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.06);
+}
+
+#aiyared-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+#aiyared-cards .aiyared-import-card {
+    position: relative;
+    margin: 0 !important;
+    overflow: hidden;
+    border: 1px solid var(--aiyared-border);
+    border-left: 0.35rem solid var(--bs-primary, #0d6efd);
+    border-radius: var(--aiyared-radius);
+    box-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+#aiyared-cards .aiyared-import-card:hover {
+    box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+#aiyared-cards .aiyared-import-card[data-open="1"] {
+    border-left-color: var(--bs-warning, #ffc107);
+}
+
+#aiyared-cards .aiyared-import-card.aiyared-ready {
+    border-color: var(--bs-success, #198754);
+    border-left-color: var(--bs-success, #198754);
+    box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.18);
+}
+
+.aiyared-import-card .aiyared-import-badges .badge {
+    padding: 0.4em 0.65em;
+    font-weight: 600;
+}
+
+.aiyared-format-row {
+    background: var(--aiyared-soft);
+    border-color: var(--aiyared-border) !important;
+    border-radius: 0.6rem !important;
+}
+
+.aiyared-format-row .form-select {
+    min-width: 14rem;
+    max-width: 100%;
+}
+
+.aiyared-format-status {
+    flex: 1 1 12rem;
+    min-width: 0;
+}
+
+.aiyared-card-ready .aiyared-format-status,
+.aiyared-ready .aiyared-format-status {
+    color: var(--bs-success-text-emphasis, #0a3622) !important;
+    font-weight: 600;
+}
+
+.aiyared-open-note {
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    background: var(--bs-warning-bg-subtle, #fff3cd);
+    color: var(--bs-warning-text-emphasis, #664d03);
+}
+
+.aiyared-import-options {
+    border-collapse: separate;
+    border-spacing: 0 0.3rem;
+}
+
+.aiyared-import-options th {
+    border: 0;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.aiyared-import-options td {
+    border: 0;
+    padding: 0.1rem 0.4rem;
+}
+
+.aiyared-import-card .aiyared-import-image img {
+    border-radius: 0.5rem;
+}
+
+.aiyared-import-card textarea.form-control {
+    resize: vertical;
+}
+
+/* Loading cover shown on a card while its question is rewritten. */
+.aiyared-card-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(1.5px);
+    font-weight: 600;
+    text-align: center;
+    color: var(--bs-body-color, #212529);
+}
+
+@media (prefers-color-scheme: dark) {
+    .aiyared-card-loading {
+        background: rgba(33, 37, 41, 0.82);
+    }
+}
+
+.aiyared-spinner {
+    flex: 0 0 auto;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: 0.22rem solid var(--bs-primary-bg-subtle, #cfe2ff);
+    border-top-color: var(--bs-primary, #0d6efd);
+    border-radius: 50%;
+    animation: aiyared-spin 0.8s linear infinite;
+}
+
+@keyframes aiyared-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .aiyared-spinner {
+        animation-duration: 2.4s;
+    }
+}
+
+/* Preview modal. */
+.aiyared-preview-dialog {
+    width: min(96vw, 48rem);
+}
+
+.aiyared-preview-dialog .aiyared-crop-card {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+}
+
+.aiyared-preview-dialog .aiyared-crop-card > .d-flex:first-child {
+    margin: 0 !important;
+    padding: 0.9rem 1.25rem;
+    border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    border-radius: 0.75rem 0.75rem 0 0;
+}
+
+.aiyared-preview-body {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 1rem 1.25rem;
+}
+
+.aiyared-preview-dialog .aiyared-crop-card > .d-flex:last-child {
+    margin: 0 !important;
+    padding: 0.8rem 1.25rem;
+    border-top: 1px solid var(--bs-border-color, #dee2e6);
+}
+
+.aiyared-pv-meta {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: var(--bs-primary-bg-subtle, #cfe2ff);
+    color: var(--bs-primary-text-emphasis, #052c65);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.aiyared-pv-section + .aiyared-pv-section {
+    margin-top: 1rem;
+}
+
+.aiyared-pv-heading {
+    margin: 0 0 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.aiyared-pv-statement {
+    padding: 0.8rem 1rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.6rem;
+    background: var(--bs-body-bg, #fff);
+    font-size: 1.02rem;
+    line-height: 1.55;
+}
+
+.aiyared-pv-figure {
+    margin: 0.75rem 0 0;
+    text-align: center;
+}
+
+.aiyared-pv-figure img {
+    max-width: 100%;
+    max-height: 22rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.5rem;
+    background: #fff;
+    object-fit: contain;
+}
+
+.aiyared-pv-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.aiyared-pv-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--bs-border-color, #dee2e6);
+    border-radius: 0.6rem;
+    background: var(--bs-body-bg, #fff);
+}
+
+.aiyared-pv-option.is-correct {
+    border-color: var(--bs-success, #198754);
+    background: var(--bs-success-bg-subtle, #d1e7dd);
+}
+
+.aiyared-pv-letter {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.8rem;
+    height: 1.8rem;
+    border-radius: 50%;
+    background: var(--bs-secondary-bg, #e9ecef);
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.is-correct .aiyared-pv-letter {
+    background: var(--bs-success, #198754);
+    color: #fff;
+}
+
+.aiyared-pv-optiontext {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.aiyared-pv-optiontext p {
+    margin: 0;
+}
+
+.aiyared-pv-mark {
+    flex: 0 0 auto;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    background: var(--bs-success, #198754);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.aiyared-pv-answer {
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--bs-success, #198754);
+    border-radius: 0.6rem;
+    background: var(--bs-success-bg-subtle, #d1e7dd);
+    font-weight: 600;
+}
+
+.aiyared-pv-feedback > div {
+    padding: 0.7rem 0.9rem;
+    border-left: 0.3rem solid var(--bs-info, #0dcaf0);
+    border-radius: 0.4rem;
+    background: var(--bs-info-bg-subtle, #cff4fc);
+}
+
+.aiyared-pv-warning {
+    margin-top: 0.5rem;
+    color: var(--bs-warning-text-emphasis, #664d03);
+    font-size: 0.875rem;
+}
+
+.aiyared-pv-note {
+    margin-top: 1rem;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.8rem;
+}
+
+@media (max-width: 575.98px) {
+    .aiyared-format-row .form-select {
+        min-width: 0;
+        width: 100% !important;
+    }
+
+    .aiyared-preview-body {
+        padding: 0.75rem;
+    }
+}
+
+/* ===== 0.20.0: legend, original statement, closed-question badges ===== */
+.aiyared-legend {
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--bs-info-border-subtle, #9eeaf9);
+    border-left: 0.3rem solid var(--bs-info, #0dcaf0);
+    border-radius: 0.6rem;
+    background: var(--bs-info-bg-subtle, #cff4fc);
+    color: var(--bs-info-text-emphasis, #055160);
+}
+
+.aiyared-legend > summary {
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.aiyared-legend li + li {
+    margin-top: 0.25rem;
+}
+
+.aiyared-pv-original {
+    margin-top: 1rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px dashed var(--bs-border-color, #dee2e6);
+    border-radius: 0.6rem;
+    background: var(--bs-tertiary-bg, #f8f9fa);
+    font-size: 0.9rem;
+}
+
+.aiyared-pv-original > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.aiyared-pv-originaltext {
+    margin-top: 0.5rem;
+    white-space: pre-wrap;
+}
+
+.aiyared-pv-originallist {
+    margin: 0.5rem 0 0;
+    padding-left: 1.6rem;
+}
+
+#aiyared-cards .aiyared-import-card:has(.badge.text-bg-danger) {
+    border-left-color: var(--bs-danger, #dc3545);
+}
+
+/* 0.23.0: aviso de revisión manual en la vista previa. */
+.aiyared-pv-opennote {
+    padding: 0.5rem 0.75rem;
+    border-left: 4px solid #b45309;
+    background: rgba(245, 158, 11, 0.12);
+    border-radius: 0.25rem;
+}
+
+/* 0.24.0: imagen de referencia (Wikimedia Commons). */
+.aiyared-refimage > summary { cursor: pointer; font-weight: 600; }
+.aiyared-ref-results { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.5rem; }
+.aiyared-ref-item { position: relative; display: flex; flex-direction: column; gap: 0.25rem; margin: 0; padding: 0.25rem;
+    border: 2px solid transparent; border-radius: 0.375rem; background: rgba(127, 127, 127, 0.08); cursor: pointer; }
+.aiyared-ref-item img { width: 100%; height: 6.5rem; object-fit: cover; border-radius: 0.25rem; }
+.aiyared-ref-item .aiyared-ref-radio { position: absolute; top: 0.5rem; left: 0.5rem; }
+.aiyared-ref-item.is-chosen { border-color: #0f6cbf; background: rgba(15, 108, 191, 0.12); }
+.aiyared-ref-caption { font-size: 0.75rem; line-height: 1.2; overflow-wrap: anywhere; }
