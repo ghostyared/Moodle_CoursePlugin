@@ -169,7 +169,8 @@ class course_builder {
         $categoryid = 0;
         if (!empty($in['createbank']) && (int) $in['questioncount'] > 0) {
             $this->log(get_string('step_questions', 'local_ai_yared_course'));
-            $generated = $this->generate_questions($title, $description, (int) $in['questioncount'], $age, $langname);
+            $generated = $this->generate_questions($title, $description, (int) $in['questioncount'], $age, $langname,
+                (string) ($in['qkind'] ?? 'auto'));
             $created = $generated['created'];
             $questionids = $generated['ids'];
             $categoryid = $generated['categoryid'];
@@ -748,15 +749,25 @@ class course_builder {
      * @param int $count Number of questions.
      * @param int $age Age.
      * @param string $langname Language name.
+     * @param string $qkind Kind of questions: auto (mathematics is detected from the topic), general, math or math:<course>.
      * @return array ['created' => int, 'ids' => int[], 'categoryid' => int] Questions saved, their ids and the category.
      */
-    protected function generate_questions(string $title, string $description, int $count, int $age, string $langname): array {
+    protected function generate_questions(string $title, string $description, int $count, int $age, string $langname,
+            string $qkind = 'auto'): array {
         global $DB;
 
         try {
             $topic = $title . ($description !== '' ? ' — ' . \core_text::substr($description, 0, 300) : '');
-            $generator = new question_generator($this->client, $this->client->get_batchsize());
-            $questions = $generator->generate([$topic], [], $count, $age, 'multichoice', $langname);
+            // Mathematics topics (algebra, trigonometry...) get exercises with LaTeX and figures drawn by the plugin;
+            // any other topic keeps the general, theoretical questions.
+            $mathcourse = math_catalog::resolve($qkind, $title . ' ' . \core_text::substr($description, 0, 300));
+            $mathmode = $mathcourse !== '';
+            $instructions = $mathmode ? math_catalog::prompt_line($mathcourse) : '';
+            if ($mathmode) {
+                $this->log(get_string('step_questions_math', 'local_ai_yared_course', math_catalog::name($mathcourse)));
+            }
+            $generator = new question_generator($this->client, $this->client->get_batchsize(), $mathmode, $mathmode);
+            $questions = $generator->generate([$topic], [], $count, $age, 'multichoice', $langname, $instructions);
             foreach ($generator->get_warnings() as $warning) {
                 $this->warnings[] = $warning;
             }
@@ -770,6 +781,9 @@ class course_builder {
             $result = question_saver::save($questions, $category, false);
             if ($result['failed'] > 0) {
                 $this->warnings[] = get_string('warn_questionsfailed', 'local_ai_yared_course', $result['failed']);
+            }
+            if ($mathmode && $result['created'] > 0 && !question_saver::math_filter_active($this->context)) {
+                $this->warnings[] = get_string('warn_mathjax', 'local_ai_yared_course');
             }
             if ($result['created'] < $count) {
                 $this->warnings[] = get_string('warn_questionsfewer', 'local_ai_yared_course',

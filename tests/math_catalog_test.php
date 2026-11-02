@@ -58,4 +58,32 @@ final class math_catalog_test extends \advanced_testcase {
         $this->assertSame('', math_catalog::prompt_line('desconocido'));
         $this->assertStringContainsString('Geometría', math_catalog::prompt_line('geometria'));
     }
+
+    /**
+     * Mathematics topics are detected from their title and description.
+     */
+    public function test_detect(): void {
+        $this->assertSame('algebra', math_catalog::detect('Ecuaciones de segundo grado'));
+        $this->assertSame('trigonometria', math_catalog::detect('Razones trigonométricas de un ángulo agudo'));
+        $this->assertSame('geometria', math_catalog::detect('Teorema de Pitágoras y triángulos'));
+        $this->assertSame('calculo', math_catalog::detect('Derivadas e integrales'));
+        $this->assertSame('otro', math_catalog::detect('Matemáticas básicas'));
+        $this->assertSame('', math_catalog::detect('La Revolución Francesa'));
+        $this->assertSame('', math_catalog::detect('Partes de la computadora'));
+    }
+
+    /**
+     * The teacher's choice decides; automatic mode falls back to detection.
+     */
+    public function test_resolve(): void {
+        $this->assertSame('', math_catalog::resolve('general', 'Álgebra'));
+        $this->assertSame('algebra', math_catalog::resolve('auto', 'Álgebra lineal'));
+        $this->assertSame('', math_catalog::resolve('auto', 'Historia del Perú'));
+        $this->assertSame('geometria', math_catalog::resolve('math:geometria', 'Historia del Perú'));
+        $this->assertSame('otro', math_catalog::resolve('math', 'Historia del Perú'));
+        $this->assertSame('trigonometria', math_catalog::resolve('math', 'Funciones trigonométricas'));
+        $this->assertTrue(math_catalog::valid_choice('math:algebra'));
+        $this->assertFalse(math_catalog::valid_choice('math:inventado'));
+        $this->assertFalse(math_catalog::valid_choice('cualquiera'));
+    }
 }

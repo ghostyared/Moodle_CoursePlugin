@@ -145,6 +145,7 @@ class job_runner {
                     ? (int) ($o['sectionnum'] ?? 0) : course_builder::NEWSECTION),
             'findvideo' => !empty($o['findvideo']),
             'questioncount' => $questioncount,
+            'qkind' => math_catalog::valid_choice((string) ($o['qkind'] ?? 'auto')) ? (string) ($o['qkind'] ?? 'auto') : 'auto',
             'createbank' => $createbank,
             'createquiz' => !empty($o['createquiz']),
             'createassign' => !empty($o['createassign']),

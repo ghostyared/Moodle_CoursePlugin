@@ -2,6 +2,10 @@
 
 All notable changes of `local_ai_yared_course`. Versions follow `release` in `version.php`.
 
+## 0.25.0 – 2026-11-02
+- Material Creator: the question bank of a topic is now mathematical (LaTeX formulas, numeric exercises and figures drawn by the plugin) when the topic is mathematics. The plugin detects it from the title and description (algebra, trigonometry, geometry, calculus, arithmetic, statistics, physics…); a new "Kind of questions" selector lets the teacher force general, or a specific mathematics course, for the whole batch. Available in the topic form and in the topic designer.
+- Warning when the MathJax/TeX filter is not active in the course.
+
 ## 0.24.1 – 2026-10-30
 Plugin directory review fixes. No functional or database change.
 - Added `LICENSE` (GNU GPL v3).

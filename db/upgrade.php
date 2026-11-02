@@ -459,5 +459,11 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026103001, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110201) {
+        // 0.25.0: the Material Creator detects mathematics topics (or the teacher chooses the kind) and generates exercises
+        // with LaTeX and figures for them instead of theory questions. No schema change.
+        upgrade_plugin_savepoint(true, 2026110201, 'local', 'ai_yared_course');
+    }
+
     return true;
 }

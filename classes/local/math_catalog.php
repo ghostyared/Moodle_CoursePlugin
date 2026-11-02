@@ -168,4 +168,141 @@ class math_catalog {
     public static function name(string $key): string {
         return self::courses()[$key]['name'] ?? '';
     }
+    /**
+     * Keywords (lower case, no accents) that reveal a mathematics course in a topic title or description.
+     *
+     * @return array key => string[]
+     */
+    protected static function keywords(): array {
+        return [
+            'trigonometria' => ['trigonometr', 'seno ', 'coseno', 'tangente', 'razones trigonometricas', 'identidades trigonometricas'],
+            'geometria' => ['geometr', 'triangulo', 'circunferencia', 'pitagoras', 'poligono', 'cuadrilatero', 'angulos',
+                'teorema de thales', 'semejanza'],
+            'calculo' => ['calculo', 'derivada', 'derivadas', 'integral', 'integrales', 'limites', 'continuidad'],
+            'algebra' => ['algebra', 'ecuacion', 'ecuaciones', 'polinomio', 'factorizacion', 'inecuacion', 'logaritmo',
+                'productos notables', 'sistemas de ecuaciones', 'exponentes', 'radicales', 'funcion cuadratica'],
+            'estadistica' => ['estadistica', 'probabilidad', 'combinatoria', 'permutacion', 'desviacion estandar',
+                'distribucion normal', 'distribucion binomial'],
+            'aritmetica' => ['aritmetica', 'divisibilidad', ' mcd', ' mcm', 'regla de tres', 'porcentaje', 'fracciones',
+                'razones y proporciones', 'numeros enteros'],
+            'razonamiento' => ['razonamiento matematico', 'razonamiento logico matematico', 'sucesiones', 'planteo de ecuaciones'],
+            'fisica' => ['fisica', 'cinematica', 'movimiento rectilineo', 'caida libre', 'leyes de newton'],
+            // English.
+            'ingles' => ['trigonometry', 'geometry', 'calculus', 'algebra', 'statistics', 'arithmetic', 'derivative', 'equation'],
+        ];
+    }
+
+    /**
+     * Lower case text without accents, for keyword matching.
+     *
+     * @param string $text Text.
+     * @return string
+     */
+    protected static function fold(string $text): string {
+        $text = mb_strtolower($text, 'UTF-8');
+        return ' ' . strtr($text, ['á' => 'a', 'é' => 'e', 'í' => 'i', 'ó' => 'o', 'ú' => 'u', 'ü' => 'u', 'ñ' => 'n']) . ' ';
+    }
+
+    /**
+     * Guess the mathematics course of a topic from its title and description.
+     *
+     * The title counts double. Several courses can match: the one with most hits wins and, on a tie, the more specific
+     * one (the order of keywords). A generic mention of "matemática" gives the generic mathematics course.
+     *
+     * @param string $text Title and description.
+     * @return string Course key, or '' when the topic does not look like mathematics.
+     */
+    public static function detect(string $text): string {
+        $folded = self::fold($text);
+        $scores = [];
+        foreach (self::keywords() as $key => $words) {
+            $hits = 0;
+            foreach ($words as $word) {
+                $hits += substr_count($folded, $word);
+            }
+            if ($hits > 0) {
+                // The English list is folded into the matching Spanish course.
+                $target = $key === 'ingles' ? self::english_course($folded) : $key;
+                $scores[$target] = ($scores[$target] ?? 0) + $hits;
+            }
+        }
+        if ($scores) {
+            arsort($scores);
+            return (string) array_key_first($scores);
+        }
+        if (preg_match('/\b(matematica|matematicas|mathematics|maths?)\b/', $folded)) {
+            return 'otro';
+        }
+        return '';
+    }
+
+    /**
+     * Course of an English topic.
+     *
+     * @param string $folded Folded text.
+     * @return string
+     */
+    protected static function english_course(string $folded): string {
+        $map = ['trigonometry' => 'trigonometria', 'geometry' => 'geometria', 'calculus' => 'calculo', 'derivative' => 'calculo',
+            'statistics' => 'estadistica', 'arithmetic' => 'aritmetica', 'algebra' => 'algebra', 'equation' => 'algebra'];
+        foreach ($map as $word => $key) {
+            if (strpos($folded, $word) !== false) {
+                return $key;
+            }
+        }
+        return 'algebra';
+    }
+
+    /**
+     * Course to use for a topic given the teacher's choice.
+     *
+     * @param string $choice 'auto', 'general', 'math' or 'math:<course key>'.
+     * @param string $text Topic title and description (used to detect the course).
+     * @return string Course key (mathematics mode) or '' (general, theoretical questions).
+     */
+    public static function resolve(string $choice, string $text): string {
+        $choice = trim($choice);
+        if ($choice === 'general') {
+            return '';
+        }
+        if (strpos($choice, 'math:') === 0) {
+            $key = substr($choice, 5);
+            if (isset(self::courses()[$key])) {
+                return $key;
+            }
+        }
+        if ($choice === 'math') {
+            return self::detect($text) ?: 'otro';
+        }
+        return self::detect($text);
+    }
+
+    /**
+     * Whether a value is an allowed "kind of questions" choice.
+     *
+     * @param string $choice Value.
+     * @return bool
+     */
+    public static function valid_choice(string $choice): bool {
+        if (in_array($choice, ['auto', 'general', 'math'], true)) {
+            return true;
+        }
+        return strpos($choice, 'math:') === 0 && isset(self::courses()[substr($choice, 5)]);
+    }
+
+    /**
+     * Options of the "kind of questions" selector: value => label.
+     *
+     * @return string[]
+     */
+    public static function choices(): array {
+        $options = [
+            'auto' => get_string('qkind_auto', 'local_ai_yared_course'),
+            'general' => get_string('qkind_general', 'local_ai_yared_course'),
+        ];
+        foreach (self::courses() as $key => $course) {
+            $options['math:' . $key] = get_string('qkind_math', 'local_ai_yared_course', $course['name']);
+        }
+        return $options;
+    }
 }

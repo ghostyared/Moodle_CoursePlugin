@@ -71,6 +71,7 @@ $options = [
     'language' => optional_param('language', 'es', PARAM_ALPHA),
     'findvideo' => $issubmit ? optional_param('findvideo', 0, PARAM_INT) : 1,
     'questioncount' => min(30, max(0, optional_param('questioncount', 10, PARAM_INT))),
+    'qkind' => optional_param('qkind', 'auto', PARAM_RAW_TRIMMED),
     'extensiontype' => optional_param('extensiontype', 'assign', PARAM_ALPHA),
     'hidesection' => $issubmit ? optional_param('hidesection', 0, PARAM_INT) : 1,
     'quizopendate' => optional_param('quizopendate', date('Y-m-d'), PARAM_TEXT),
@@ -258,6 +259,13 @@ echo html_writer::start_div('col-md-4 mb-2');
 echo html_writer::label(get_string('questioncount', 'local_ai_yared_course'), 'questioncount');
 echo html_writer::select([0 => get_string('questioncount_none', 'local_ai_yared_course'), 10 => 10, 20 => 20, 30 => 30],
     'questioncount', $options['questioncount'], false, ['id' => 'questioncount', 'class' => 'form-control']);
+echo html_writer::end_div();
+
+echo html_writer::start_div('col-md-4 mb-2');
+echo html_writer::label(get_string('qkind', 'local_ai_yared_course'), 'qkind');
+echo html_writer::select(\local_ai_yared_course\local\math_catalog::choices(), 'qkind',
+    \local_ai_yared_course\local\math_catalog::valid_choice((string) $options['qkind']) ? $options['qkind'] : 'auto', false,
+    ['id' => 'qkind', 'class' => 'form-control']);
 echo html_writer::end_div();
 
 echo html_writer::start_div('col-md-4 mb-2');

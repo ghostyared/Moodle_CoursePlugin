@@ -89,6 +89,10 @@ if (!isset(generate_form::LANGUAGES[$language])) {
     $language = $defaultlanguage;
 }
 $questioncount = min(30, max(1, optional_param('questioncount', 10, PARAM_INT)));
+$qkind = optional_param('qkind', 'auto', PARAM_RAW_TRIMMED);
+if (!\local_ai_yared_course\local\math_catalog::valid_choice($qkind)) {
+    $qkind = 'auto';
+}
 $findvideo = $issubmit ? optional_param('findvideo', 0, PARAM_INT) : 1;
 $createbank = $issubmit ? optional_param('createbank', 0, PARAM_INT) : 1;
 $createquiz = $issubmit ? optional_param('createquiz', 0, PARAM_INT) : 1;
@@ -186,6 +190,7 @@ if ($issubmit && !$errors) {
         'sectionmode' => $sectionmode,
         'sectionnum' => $sectionnum,
         'questioncount' => $questioncount,
+        'qkind' => $qkind,
         'findvideo' => !empty($findvideo),
         'createbank' => !empty($createbank),
         'createquiz' => !empty($createquiz),
@@ -425,6 +430,16 @@ echo $rendercheckbox('createassign', get_string('createassign', 'local_ai_yared_
     get_string('createassign_desc', 'local_ai_yared_course'), !empty($createassign));
 echo $rendercheckbox('createforum', get_string('createforum', 'local_ai_yared_course'),
     get_string('createforum_desc', 'local_ai_yared_course'), !empty($createforum));
+echo html_writer::end_div();
+echo html_writer::end_div();
+
+// Kind of questions for the bank: the plugin detects mathematics topics, and the teacher can force the kind.
+echo html_writer::start_div('row');
+echo html_writer::start_div('col-12 col-lg-6 mb-3');
+echo html_writer::label(get_string('qkind', 'local_ai_yared_course'), 'qkind', false, ['class' => 'form-label']);
+echo html_writer::select(\local_ai_yared_course\local\math_catalog::choices(), 'qkind', $qkind, false,
+    ['id' => 'qkind', 'class' => 'form-select form-control']);
+echo html_writer::div(get_string('qkind_help', 'local_ai_yared_course'), 'form-text');
 echo html_writer::end_div();
 echo html_writer::end_div();
 

@@ -56,6 +56,9 @@ class topic_runner {
         $options['quiztimelimit'] = $clamp($options['quiztimelimit'] ?? null, 0, 600, 60);
         $options['quizattempts'] = $clamp($options['quizattempts'] ?? null, 0, 20, 2);
         $options['quizclosedays'] = $clamp($options['quizclosedays'] ?? null, 0, 365, 7);
+        if (!math_catalog::valid_choice((string) ($options['qkind'] ?? 'auto'))) {
+            $options['qkind'] = 'auto';
+        }
         if (!isset(\local_ai_yared_course\form\generate_form::LANGUAGES[$options['language'] ?? ''])) {
             $options['language'] = 'es';
         }
@@ -73,6 +76,7 @@ class topic_runner {
             'language' => 'es',
             'findvideo' => 1,
             'questioncount' => 10,
+            'qkind' => 'auto',
             'extensiontype' => 'assign',
             'hidesection' => 1,
             'quizopen' => strtotime('today'),
@@ -115,6 +119,7 @@ class topic_runner {
             'sectionnum' => course_builder::NEWSECTION,
             'findvideo' => !empty($options['findvideo']),
             'questioncount' => (int) $options['questioncount'],
+            'qkind' => (string) $options['qkind'],
             'extensiontype' => $options['extensiontype'] === 'quiz' ? 'quiz' : 'assign',
             'hidesection' => !empty($options['hidesection']),
             'classdate' => (int) $topic->classdate,
