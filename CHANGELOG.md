@@ -2,6 +2,11 @@
 
 All notable changes of `local_ai_yared_course`. Versions follow `release` in `version.php`.
 
+## 0.29.0 – 2026-11-03
+- Class presentation is now a PowerPoint file (.pptx) published in the topic as an ordinary file resource. The built-in slide viewer and editor (and its page, AJAX endpoint and file area) were removed: teachers download, edit and replace the file with PowerPoint, Microsoft 365 or Google Slides, or upload their own presentation in the activity settings.
+- The file keeps the slide text, notes, icons and Wikimedia Commons pictures (with credit). Figures drawn for mathematics topics are not included in slides.
+- Presentations created with 0.26–0.28 (URL activities pointing to the old viewer) stop working; they only existed in QA builds.
+
 ## 0.28.0 – 2026-11-03
 - Class presentation: download as PowerPoint (.pptx), editable in PowerPoint, Google Slides (import) or LibreOffice; includes pictures, icons and the teacher's notes.
 - Fix: saving the slide editor failed with "clean() can not process arrays" (nested form fields are not supported by Moodle).

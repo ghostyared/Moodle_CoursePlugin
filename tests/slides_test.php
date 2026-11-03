@@ -20,7 +20,7 @@ namespace local_ai_yared_course;
 use local_ai_yared_course\local\slides;
 
 /**
- * Tests for the class presentation (slides): cleaning, editing and the viewer markup.
+ * Tests for the class presentation (slides): cleaning of the AI answer and the slide icon.
  *
  * @package    local_ai_yared_course
  * @copyright  2026 GhostYared Corp
@@ -52,32 +52,6 @@ final class slides_test extends \advanced_testcase {
     }
 
     /**
-     * The teacher can remove slides, reorder them and add a blank one; pictures are kept.
-     */
-    public function test_apply_edits(): void {
-        $deck = ['slides' => [
-            slides::blank('title'),
-            ['image' => ['file' => 'img-1.jpg', 'credit' => 'X', 'alt' => ''], 'title' => 'B'] + slides::blank(),
-            ['title' => 'C'] + slides::blank(),
-        ]];
-        $deck['slides'][0]['title'] = 'A';
-        $edited = slides::apply_edits($deck, [
-            0 => ['keep' => 1, 'order' => 3, 'title' => 'A2', 'layout' => 'title'],
-            1 => ['keep' => 1, 'order' => 1, 'title' => 'B2', 'bullets' => "uno\ndos", 'layout' => 'example'],
-            2 => ['title' => 'C2'],
-        ]);
-        $this->assertCount(2, $edited['slides']);
-        $this->assertSame('B2', $edited['slides'][0]['title']);
-        $this->assertSame(['uno', 'dos'], $edited['slides'][0]['bullets']);
-        $this->assertSame('img-1.jpg', $edited['slides'][0]['image']['file']);
-        $this->assertSame('A2', $edited['slides'][1]['title']);
-
-        $added = slides::apply_edits($edited, [], true);
-        $this->assertCount(3, $added['slides']);
-        $this->assertSame('', $added['slides'][2]['title']);
-    }
-
-    /**
      * Text from forms or the AI never keeps HTML.
      */
     public function test_clean(): void {
@@ -86,23 +60,6 @@ final class slides_test extends \advanced_testcase {
         $this->assertSame('', slides::clean(['a'], 10));
         $rules = slides::size_rules(6);
         $this->assertLessThan(slides::size_rules(20)['slides'], $rules['slides']);
-    }
-
-    /**
-     * The viewer prints every slide, escapes the text and hides nothing in the markup of the notes.
-     */
-    public function test_render_viewer(): void {
-        $deck = ['slides' => [
-            ['layout' => 'bullets', 'title' => '<i>T</i>', 'text' => '', 'bullets' => ['a<b'], 'notes' => 'nota "x"',
-                'figure_svg' => null, 'image' => null],
-            ['layout' => 'summary', 'title' => 'Fin', 'text' => '', 'bullets' => [], 'notes' => '', 'figure_svg' => null,
-                'image' => null],
-        ]];
-        $html = slides::render_viewer($deck);
-        $this->assertSame(2, substr_count($html, '<section'));
-        $this->assertStringNotContainsString('<i>T</i>', $html);
-        $this->assertStringContainsString('a&lt;b', $html);
-        $this->assertStringContainsString('1 / 2', $html);
     }
 
     /**
@@ -117,14 +74,4 @@ final class slides_test extends \advanced_testcase {
         $this->assertSame('💡', $deck['slides'][0]['emoji']);
     }
 
-    /**
-     * A slide without picture or figure shows its icon in the viewer.
-     */
-    public function test_viewer_icon(): void {
-        $deck = ['slides' => [['layout' => 'bullets', 'title' => 'A', 'bullets' => ['x'], 'emoji' => '💡'] + slides::blank()]];
-        $deck['slides'][0]['emoji'] = '💡';
-        $html = slides::render_viewer($deck);
-        $this->assertStringContainsString('aiyared-slide-icon', $html);
-        $this->assertStringContainsString('💡', $html);
-    }
 }

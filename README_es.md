@@ -54,6 +54,12 @@ Después poner `/opt/pymupdf/bin/python` en **Python para convertir PDFs**. Si e
 ## Novedades 0.24.0 — Imagen de referencia (Wikimedia Commons)
 En la pantalla «Revisar antes de guardar» (importación de PDF y generador) cada pregunta tiene el panel **Imagen de referencia (opcional)**: se buscan imágenes libres en Wikimedia Commons (la IA deduce qué buscar si se deja vacío), el docente elige una miniatura (se muestran autor y licencia) y **Procesar y reformular** adjunta la imagen y reformula la pregunta para que dependa de ella. El crédito se agrega a la retroalimentación al guardar. Ajuste de administrador: `imagesearch`. **Requisito:** salida HTTPS del servidor Moodle a `commons.wikimedia.org` y `upload.wikimedia.org`.
 
+## Presentación de la clase en PowerPoint (0.29.0)
+
+En el Creador de Material, la casilla **Presentación de la clase** hace que la IA arme un archivo `.pptx` y lo publique en el tema como un archivo normal del curso. Incluye las ideas clave, notas para el docente, un ícono por diapositiva e imágenes libres de Wikimedia Commons (con su crédito) cuando el servidor tiene salida a internet. En *Administración → Informes → Estado* hay una línea que indica si el servidor llega a Commons.
+
+El docente puede descargarlo y editarlo en PowerPoint, en Microsoft 365 (abriéndolo desde OneDrive) o en Google Slides (*Archivo → Importar diapositivas*), y reemplazarlo por su propia presentación desde *Editar ajustes* de la actividad. Las figuras dibujadas para temas de matemática no se incluyen en las diapositivas.
+
 ## Configuración (administrador)
 *Administración del sitio → Extensiones → Plugins locales → Yared.AI Creador de Material*
 

@@ -4,7 +4,7 @@ Local plugin for Moodle that uses AI to build the content of a course topic (hea
 
 - Component: `local_ai_yared_course`
 - Maturity: beta
-- Release: 0.28.0
+- Release: 0.29.0
 - Licence: GNU GPL v3 or later (see `LICENSE`)
 - Copyright: 2026 GhostYared Corp
 
@@ -25,7 +25,7 @@ The plugin requires Moodle 4.5 or later (`$plugin->requires = 2024100700`).
 Optional: cropping figures from PDFs needs **Python 3 + PyMuPDF** on the same server as PHP (see *Status of the PDF conversion* in the plugin settings). Without them the plugin still works, but PDFs are analysed as text only and no crops are generated.
 
 ## Features
-- **Class presentation:** optional editable slides per topic (viewer with full screen; pictures from Wikimedia Commons, an icon per slide, or the teacher's own upload).
+- **Class presentation:** optional PowerPoint file (.pptx) per topic, published as an ordinary file resource with the key ideas, notes for the teacher, an icon per slide and free pictures from Wikimedia Commons when the server can reach it. Teachers edit it in PowerPoint, Microsoft 365 or Google Slides, or replace it with their own file.
 - **Material Creator:** creates, in one batch, a section per topic with header, YouTube support video, PDF handout, graded practice (hidden quiz tied to a question bank) and an extension task. Mathematics topics (algebra, trigonometry, geometry…) get exercises with LaTeX and figures instead of theory questions (automatic detection, or chosen by the teacher).
 - **Question Creator:** classic mode (multiple choice, multiple selection, true/false, missing word, drag and drop text, and, only when the teacher chooses them, short answer and essay), mathematics mode with LaTeX and figures drawn by the plugin as SVG, and import from PDF or images.
 - **Review before saving:** the teacher can edit the statement, options, correct answer and feedback of every generated or imported question, ask for a rewrite, another variant or another model, and optionally attach a free reference picture from Wikimedia Commons (the credit is added to the feedback).

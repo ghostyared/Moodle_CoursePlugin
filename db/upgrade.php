@@ -476,5 +476,11 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110302, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110303) {
+        // 0.29.0: the class presentation is a .pptx file resource; the built-in viewer and editor were removed.
+        // No schema change.
+        upgrade_plugin_savepoint(true, 2026110303, 'local', 'ai_yared_course');
+    }
+
     return true;
 }

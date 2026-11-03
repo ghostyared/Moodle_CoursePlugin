@@ -150,18 +150,22 @@ class course_builder {
             }
         }
 
-        // 3b. Class presentation (slides), editable by the teacher afterwards.
+        // 3b. Class presentation: a PowerPoint file (.pptx) the teacher can edit or replace.
         $slides = null;
+        $pictures = [];
         if (!empty($in['createslides'])) {
             $this->log(get_string('step_slides', 'local_ai_yared_course'));
             try {
-                $mathkey = math_catalog::resolve((string) ($in['qkind'] ?? 'auto'),
-                    $title . ' ' . \core_text::substr($description, 0, 300));
-                $slides = $generator->generate_slides($title, $description, $overview, $age, $langname, $lang,
-                    $mathkey !== '' && math_catalog::uses_figures($mathkey));
+                $slides = $generator->generate_slides($title, $description, $overview, $age, $langname, $lang, false);
                 if ($slides === null) {
                     $this->warnings[] = get_string('warn_slides', 'local_ai_yared_course', get_string('error_badjson',
                         'local_ai_yared_course'));
+                } else {
+                    // Free pictures from Wikimedia Commons, best effort: without them each slide keeps its icon.
+                    [$slides, $pictures, $imgerror] = slides::attach_images($slides);
+                    if ($imgerror !== '') {
+                        $this->warnings[] = get_string('warn_slides_images', 'local_ai_yared_course', s($imgerror));
+                    }
                 }
             } catch (job_cancelled $e) {
                 throw $e;
@@ -180,7 +184,7 @@ class course_builder {
         $this->build_header($title, $overview, $age, $lang, (int) $in['classdate']);
         $this->build_video($title, $video, $age, $lang);
         if (!empty($slides['slides'])) {
-            $this->build_slides($title, (array) $slides, $age, $lang);
+            $this->build_slides($title, (array) $slides, $pictures, $age, $lang);
         }
         if ($createpdf) {
             $this->build_material($title, $pdf, $age, $lang);
@@ -465,39 +469,49 @@ class course_builder {
     }
 
     /**
-     * Class presentation block: heading and a link to the viewer of the plugin.
+     * Class presentation block: heading and a PowerPoint file (.pptx) published as an ordinary file resource.
      *
-     * The slides are stored in the course (see slides) so the teacher can edit them afterwards.
+     * Being a normal file, the teacher can download it, edit it (PowerPoint, Microsoft 365, Google Slides) and replace
+     * it from the activity settings. Nothing is sent to any external service.
      *
      * @param string $title Topic title.
      * @param array $deck Deck (see slides).
+     * @param array $pictures Pictures of the deck (file name => bytes).
      * @param int $age Age.
      * @param string $lang Content language.
      */
-    protected function build_slides(string $title, array $deck, int $age, string $lang): void {
-        $this->try_add('slides', function () use ($title, $deck, $age, $lang) {
+    protected function build_slides(string $title, array $deck, array $pictures, int $age, string $lang): void {
+        $this->try_add('slides', function () use ($title, $deck, $pictures, $age, $lang) {
+            global $USER;
+
+            $pptx = pptx_export::build($deck, function (string $file) use ($pictures): string {
+                return (string) ($pictures[$file] ?? '');
+            });
             $this->add_module('label', '', html_builder::block_heading(
                 strings::get('heading_slides', $lang), strings::get('slides_subtitle', $lang), $age), true);
+
+            $draftid = file_get_unused_draft_itemid();
+            get_file_storage()->create_file_from_string([
+                'contextid' => \context_user::instance($USER->id)->id,
+                'component' => 'user',
+                'filearea' => 'draft',
+                'itemid' => $draftid,
+                'filepath' => '/',
+                'filename' => clean_filename(\core_text::substr($title, 0, 80)) . '.pptx',
+            ], $pptx);
+
             $count = count((array) $deck['slides']);
-            $intro = html_builder::paragraph(strings::get('slides_intro', $lang, $count));
-            $itemid = slides::new_itemid();
-            $deck['language'] = $lang;
-            // Free pictures from Wikimedia Commons, best effort: without them the slides show their icon.
-            try {
-                [$deck, $attached, $imgerror] = slides::attach_images($deck, $this->context, $itemid);
-                if ($imgerror !== '') {
-                    $this->warnings[] = get_string('warn_slides_images', 'local_ai_yared_course', s($imgerror));
-                }
-            } catch (\Throwable $e) {
-                $this->warnings[] = get_string('warn_slides_images', 'local_ai_yared_course', s($e->getMessage()));
-            }
-            slides::save($this->context, $itemid, $deck);
-            $url = slides::url((int) $this->course->id, $itemid)->out(false);
-            $created = $this->add_module('url', strings::get('slides_name', $lang, $title), $intro, true,
-                ['externalurl' => $url, 'display' => RESOURCELIB_DISPLAY_NEW, 'printintro' => 1, 'showdescription' => 1]);
-            // The viewer hides the presentation from students while this activity is hidden.
-            $deck['cmid'] = (int) $created->coursemodule;
-            slides::save($this->context, $itemid, $deck);
+            $this->add_module('resource', strings::get('slides_name', $lang, $title),
+                html_builder::paragraph(strings::get('slides_intro', $lang, $count)), true, [
+                    'files' => $draftid,
+                    'display' => RESOURCELIB_DISPLAY_AUTO,
+                    'printintro' => 1,
+                    'showsize' => 1,
+                    'showtype' => 1,
+                    'showdate' => 0,
+                    'filterfiles' => 0,
+                    'showdescription' => 1,
+                ]);
         });
     }
 
