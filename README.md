@@ -4,7 +4,7 @@ Local plugin for Moodle that uses AI to build the content of a course topic (hea
 
 - Component: `local_ai_yared_course`
 - Maturity: beta
-- Release: 0.26.0
+- Release: 0.26.1
 - Licence: GNU GPL v3 or later (see `LICENSE`)
 - Copyright: 2026 GhostYared Corp
 

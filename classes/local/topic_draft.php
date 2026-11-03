@@ -43,9 +43,10 @@ class topic_draft {
      * @param int $courseid Course.
      * @param array $in Input of course_builder (title, age, language, section options...).
      * @param array $parts Result of course_builder::prepare_topic().
+     * @param int $jobid Batch (job) that generated it, to go back to the list of topics.
      * @return int Draft id.
      */
-    public static function create(int $userid, int $courseid, array $in, array $parts): int {
+    public static function create(int $userid, int $courseid, array $in, array $parts, int $jobid = 0): int {
         $pdf = $parts['pdf'] ?? null;
         unset($parts['pdf']);
         $parts['haspdf'] = $pdf !== null;
@@ -55,6 +56,7 @@ class topic_draft {
             'courseid' => $courseid,
             'timecreated' => time(),
             'origin' => self::ORIGIN,
+            'jobid' => $jobid,
             'in' => $in,
             'parts' => $parts,
         ]);

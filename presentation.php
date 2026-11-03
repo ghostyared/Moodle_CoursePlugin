@@ -63,7 +63,7 @@ $imageurl = function (string $file) use ($context, $itemid): string {
 // Save the edits (or add a blank slide).
 if ($edit && $canedit && ($action === 'save' || $action === 'add')) {
     require_sesskey();
-    $deck = slides::apply_edits($deck, optional_param_array('s', [], PARAM_RAW), $action === 'add');
+    $deck = slides::apply_edits($deck, optional_param_array('aiys', [], PARAM_RAW), $action === 'add');
     $newtitle = trim(optional_param('deck_title', '', PARAM_TEXT));
     if ($newtitle !== '') {
         $deck['title'] = slides::clean($newtitle, 150);

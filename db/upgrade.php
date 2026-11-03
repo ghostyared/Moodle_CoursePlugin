@@ -471,5 +471,11 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110202, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110203) {
+        // 0.26.1: fix creating a topic from the preview (request parameter names), link back to the batch list, and
+        // a clear message (keeping the draft) when the creation fails. No schema change.
+        upgrade_plugin_savepoint(true, 2026110203, 'local', 'ai_yared_course');
+    }
+
     return true;
 }

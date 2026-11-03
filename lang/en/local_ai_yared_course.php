@@ -1002,3 +1002,6 @@ $string['presentation_fullscreen'] = 'Full screen';
 $string['presentation_prev'] = 'Previous';
 $string['presentation_next'] = 'Next';
 $string['presentation_toobig'] = 'The presentation is too big to be saved. Remove slides or pictures.';
+$string['preview_create_failed'] = 'The topic could not be created: {$a}. Your draft is still saved with your edits. Check the course for a half-created (hidden) section and delete it before trying again.';
+$string['preview_back_to_preview'] = 'Back to the preview';
+$string['preview_back_to_batch'] = 'Back to the list of topics of the batch';

@@ -1002,3 +1002,6 @@ $string['presentation_fullscreen'] = 'Pantalla completa';
 $string['presentation_prev'] = 'Anterior';
 $string['presentation_next'] = 'Siguiente';
 $string['presentation_toobig'] = 'La presentación es demasiado grande para guardarla. Quite diapositivas o imágenes.';
+$string['preview_create_failed'] = 'No se pudo crear el tema: {$a}. Su borrador sigue guardado con lo que editó. Revise en el curso si quedó una sección a medias (oculta) y elimínela antes de reintentar.';
+$string['preview_back_to_preview'] = 'Volver a la vista previa';
+$string['preview_back_to_batch'] = 'Volver a la lista de temas del lote';

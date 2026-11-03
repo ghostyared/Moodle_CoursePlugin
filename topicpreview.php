@@ -52,6 +52,7 @@ $PAGE->set_pagelayout('incourse');
 $PAGE->set_title(get_string('preview_title', 'local_ai_yared_course'));
 $PAGE->set_heading(format_string($course->fullname));
 
+$backurl = $formurl;
 try {
     $manifest = topic_draft::load($draftid, (int) $USER->id, (int) $course->id);
 } catch (moodle_exception $e) {
@@ -62,11 +63,16 @@ try {
     exit;
 }
 
+if ((int) ($manifest['jobid'] ?? 0) > 0) {
+    // Back to the list of topics of the same batch, to review the other ones.
+    $backurl = new moodle_url('/local/ai_yared_course/job.php', ['id' => (int) $manifest['jobid']]);
+}
+
 // Discard.
 if ($action === 'discard') {
     require_sesskey();
     topic_draft::delete($draftid, (int) $USER->id);
-    redirect($formurl, get_string('preview_discarded', 'local_ai_yared_course'), null,
+    redirect($backurl, get_string('preview_discarded', 'local_ai_yared_course'), null,
         \core\output\notification::NOTIFY_INFO);
 }
 
@@ -87,8 +93,8 @@ if ($action === 'save' || $action === 'create') {
             'forum_question' => optional_param('forum_question', '', PARAM_RAW),
             'extension_title' => optional_param('extension_title', '', PARAM_RAW),
             'extension_instructions' => optional_param('extension_instructions', '', PARAM_RAW),
-            'q' => optional_param_array('q', [], PARAM_RAW),
-            's' => optional_param_array('s', [], PARAM_RAW),
+            'q' => optional_param_array('aiyq', [], PARAM_RAW),
+            's' => optional_param_array('aiys', [], PARAM_RAW),
         ];
         $manifest = topic_draft::apply_edits($manifest, $post);
         topic_draft::save($draftid, (int) $USER->id, $manifest);
@@ -98,15 +104,37 @@ if ($action === 'save' || $action === 'create') {
                 \core\output\notification::NOTIFY_SUCCESS);
         }
 
-        // Create the topic from the approved content: no AI call is needed.
+        // Create the topic from the approved content: no AI call is needed. The posted edit fields are removed from the
+        // request first: Moodle activity code reads request parameters with common names and cannot read arrays.
+        unset($_POST['aiyq'], $_POST['aiys'], $_REQUEST['aiyq'], $_REQUEST['aiys']);
         core_php_time_limit::raise(300);
-        $client = ai_factory::create();
-        $builder = new course_builder($course, $client);
-        $parts = topic_draft::parts_for_creation($draftid, (int) $USER->id, $manifest);
-        $created = $builder->create_topic($manifest['in'], $parts);
-        topic_draft::delete($draftid, (int) $USER->id);
+        $createerror = '';
+        try {
+            $client = ai_factory::create();
+            $builder = new course_builder($course, $client);
+            $parts = topic_draft::parts_for_creation($draftid, (int) $USER->id, $manifest);
+            $created = $builder->create_topic($manifest['in'], $parts);
+            topic_draft::delete($draftid, (int) $USER->id);
+        } catch (\Throwable $e) {
+            // The draft is kept: nothing the teacher edited is lost.
+            $createerror = $e->getMessage();
+            debugging('local_ai_yared_course: topic creation from a draft failed: ' . $createerror, DEBUG_DEVELOPER);
+        }
     } finally {
         $lock->release();
+    }
+
+    if ($createerror !== '') {
+        echo $OUTPUT->header();
+        echo $OUTPUT->notification(get_string('preview_create_failed', 'local_ai_yared_course', s($createerror)), 'error');
+        echo html_writer::div(
+            $OUTPUT->single_button($url, get_string('preview_back_to_preview', 'local_ai_yared_course'), 'get',
+                ['type' => 'primary']) .
+            $OUTPUT->single_button(new moodle_url('/course/view.php', ['id' => $course->id]),
+                get_string('gotocourse', 'local_ai_yared_course'), 'get'),
+            'd-flex flex-wrap gap-2 mb-3');
+        echo $OUTPUT->footer();
+        exit;
     }
 
     echo $OUTPUT->header();
@@ -121,6 +149,8 @@ if ($action === 'save' || $action === 'create') {
     echo html_writer::div(
         $OUTPUT->single_button(new moodle_url('/course/view.php', ['id' => $course->id]),
             get_string('gotocourse', 'local_ai_yared_course'), 'get', ['type' => 'primary']) .
+        ($backurl !== $formurl ? $OUTPUT->single_button($backurl, get_string('preview_back_to_batch',
+            'local_ai_yared_course'), 'get') : '') .
         $OUTPUT->single_button($formurl, get_string('createanotherbatch', 'local_ai_yared_course'), 'get'),
         'd-flex flex-wrap gap-2 mb-3');
     echo $OUTPUT->footer();
@@ -154,6 +184,10 @@ $date = function (int $timestamp): string {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('preview_title', 'local_ai_yared_course') . ': ' . s($in['title']));
 echo $OUTPUT->notification(get_string('preview_intro', 'local_ai_yared_course'), 'info');
+if ($backurl !== $formurl) {
+    echo html_writer::div(html_writer::link($backurl, '← ' . get_string('preview_back_to_batch', 'local_ai_yared_course')),
+        'mb-2');
+}
 if (!empty($parts['warnings'])) {
     echo html_writer::tag('details', html_writer::tag('summary',
         get_string('warnings_show', 'local_ai_yared_course', count($parts['warnings']))) .
@@ -265,20 +299,20 @@ if (!empty($in['createbank']) && (int) $in['questioncount'] > 0) {
                 ? ' ' . html_writer::span('✔ ' . get_string('preview_correct', 'local_ai_yared_course'),
                     'badge bg-success') : ''));
         }
-        $editor = html_writer::tag('textarea', s((string) $question['text']), ['name' => "q[$i][text]", 'rows' => 3,
+        $editor = html_writer::tag('textarea', s((string) $question['text']), ['name' => "aiyq[$i][text]", 'rows' => 3,
             'class' => 'form-control mb-2']);
         foreach ((array) ($question['options'] ?? []) as $j => $option) {
             $editor .= html_writer::div(
-                html_writer::empty_tag('input', array_filter(['type' => 'radio', 'name' => "q[$i][correct]", 'value' => $j,
+                html_writer::empty_tag('input', array_filter(['type' => 'radio', 'name' => "aiyq[$i][correct]", 'value' => $j,
                     'checked' => !empty($option['correct']) ? 'checked' : null, 'class' => 'form-check-input mt-0',
                     'title' => get_string('preview_correct', 'local_ai_yared_course')])) .
-                html_writer::empty_tag('input', ['type' => 'text', 'name' => "q[$i][options][$j]",
+                html_writer::empty_tag('input', ['type' => 'text', 'name' => "aiyq[$i][options][$j]",
                     'value' => (string) $option['text'], 'class' => 'form-control']),
                 'd-flex gap-2 align-items-center mb-1');
         }
         echo html_writer::div(
             html_writer::div(
-                html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => "q[$i][include]", 'value' => 1,
+                html_writer::empty_tag('input', ['type' => 'checkbox', 'name' => "aiyq[$i][include]", 'value' => 1,
                     'checked' => 'checked', 'id' => "aiyared-q-$i", 'class' => 'form-check-input']) .
                 html_writer::label(get_string('preview_question_n', 'local_ai_yared_course', $i + 1), "aiyared-q-$i", false,
                     ['class' => 'form-check-label fw-semibold ms-2']),

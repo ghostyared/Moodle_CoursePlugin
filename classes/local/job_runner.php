@@ -84,7 +84,7 @@ class job_runner {
                     $builder = new course_builder($course, $client, $trace);
                     if ($preview) {
                         $parts = $builder->prepare_topic($input);
-                        $draftid = topic_draft::create((int) $job->userid, (int) $course->id, $input, $parts);
+                        $draftid = topic_draft::create((int) $job->userid, (int) $course->id, $input, $parts, (int) $job->id);
                         $result = [
                             'draft' => $draftid,
                             'preview' => true,

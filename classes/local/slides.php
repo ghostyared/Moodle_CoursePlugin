@@ -494,7 +494,7 @@ JS;
         $html = '';
         foreach (array_values((array) ($deck['slides'] ?? [])) as $i => $slide) {
             $name = function (string $field) use ($i): string {
-                return "s[$i][$field]";
+                return "aiys[$i][$field]";
             };
             $field = function (string $field, string $label, string $control) use ($i): string {
                 return \html_writer::div(\html_writer::label($label, "aiyared-s$i-$field", false,
