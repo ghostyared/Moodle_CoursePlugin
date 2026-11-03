@@ -83,7 +83,8 @@ function local_ai_yared_course_status_checks(): array {
 /**
  * Serve the crops and the manifest of a pending PDF/image import.
  *
- * The files live in the user context because they belong to a temporary review, not to a course.
+ * Import review files live in the user context (a temporary review, not a course); the pictures of a class presentation
+ * live in the course context.
  *
  * @param stdClass $course Course, when the URL includes it.
  * @param stdClass|null $cm Course module, when the URL includes it.
@@ -97,6 +98,28 @@ function local_ai_yared_course_status_checks(): array {
 function local_ai_yared_course_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload,
         array $options = []) {
     global $USER;
+
+    if ($filearea === \local_ai_yared_course\local\slides::AREA && $context->contextlevel === CONTEXT_COURSE) {
+        // Pictures of a class presentation: served with the same rules as the presentation page.
+        $course = get_course($context->instanceid);
+        require_login($course);
+        $itemid = (int) array_shift($args);
+        $filename = array_pop($args);
+        if ($args || $filename === null) {
+            return false;
+        }
+        $deck = \local_ai_yared_course\local\slides::load($context, $itemid);
+        if (!$deck || !\local_ai_yared_course\local\slides::can_view($course, $context, $deck)) {
+            return false;
+        }
+        $file = get_file_storage()->get_file($context->id, 'local_ai_yared_course', \local_ai_yared_course\local\slides::AREA,
+            $itemid, '/', clean_filename($filename));
+        if (!$file || $file->is_directory() || $file->get_filename() === \local_ai_yared_course\local\slides::DECK) {
+            return false;
+        }
+        send_stored_file($file, 0, 0, false, $options);
+        return true;
+    }
 
     if ($filearea !== 'import' || $context->contextlevel !== CONTEXT_USER) {
         return false;

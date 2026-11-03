@@ -77,6 +77,64 @@ class topic_generator {
     }
 
     /**
+     * Generate the class presentation (slides) of a topic.
+     *
+     * @param string $title Topic title.
+     * @param string $description Teacher description of the content.
+     * @param array $overview Overview already generated (summary, objectives, key points).
+     * @param int $age Target age.
+     * @param string $language Language name (e.g. "Spanish").
+     * @param string $langcode Language code (e.g. "es").
+     * @param bool $allowfigures Whether geometric figures can be described (mathematics topics).
+     * @return array|null The deck (see slides::from_ai()), or null when nothing usable came back.
+     * @throws \moodle_exception If the answer is not valid JSON.
+     */
+    public function generate_slides(string $title, string $description, array $overview, int $age, string $language,
+            string $langcode, bool $allowfigures = false): ?array {
+        $size = slides::size_rules($age);
+        $rules = self::size_rules($age);
+        $system = 'You are an expert teacher who designs clear classroom slides. You always reply with one single valid '
+            . 'JSON object and nothing else.';
+        $points = [];
+        foreach ((array) ($overview['key_points'] ?? []) as $point) {
+            $points[] = trim(($point['title'] ?? '') . ': ' . ($point['text'] ?? ''));
+        }
+        $lines = [
+            "Topic title: {$title}",
+            "Teacher's description of what the topic must cover: {$description}",
+            'Audience: ' . question_generator::age_descriptor($age),
+            "Language of ALL the text: {$language}.",
+            'Writing style: ' . $rules['style'],
+            'Learning objectives already decided: ' . implode(' | ', (array) ($overview['objectives'] ?? [])),
+            'Key ideas already decided: ' . implode(' | ', $points),
+            '',
+            "Create the slides for the class presentation: about {$size['slides']} slides in this order: 1 title slide, "
+                . '1 objectives slide, the core content slides (one idea per slide), 1 worked example or activity slide, '
+                . '1 summary slide. Rules:',
+            "- Each slide has at most {$size['bullets']} bullets of at most {$size['words']} words each; slides are read "
+                . 'from far away: short phrases, no paragraphs, no markdown, no HTML.',
+            '- "layout" is one of "title", "bullets", "example", "summary".',
+            '- "text" is an optional one-sentence line (use it on the title slide as the subtitle).',
+            '- "notes" are 1-3 sentences for the teacher to say or explain on that slide (not shown to students).',
+            '- "image_query" is 2 to 5 words (in English) to search a free picture for that slide, or "" when a picture '
+                . 'would not help. Never ask for a picture of a real living person.',
+            '- Facts must be correct and consistent with the key ideas above.',
+        ];
+        if ($allowfigures) {
+            foreach (question_generator::figure_rules() as $rule) {
+                $lines[] = $rule;
+            }
+            $lines[] = '- Use the "figure" field only on slides where a figure makes the idea clear.';
+        }
+        $lines[] = 'Reply with JSON in exactly this shape:';
+        $lines[] = '{"title":"...","slides":[{"layout":"title","title":"...","text":"...","bullets":[],"notes":"...",'
+            . '"image_query":"..."},{"layout":"bullets","title":"...","bullets":["..."],"notes":"...","image_query":""}]}';
+
+        $data = self::decode($this->client->complete($system, implode("\n", $lines)));
+        return slides::from_ai($data, $title, $langcode, $allowfigures);
+    }
+
+    /**
      * Generate the overview used for the header, the practice and the extension activity.
      *
      * @param string $title Topic title.

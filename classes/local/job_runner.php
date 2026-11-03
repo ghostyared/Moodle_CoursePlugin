@@ -64,6 +64,9 @@ class job_runner {
                 throw new \moodle_exception('notconfigured_teacher', 'local_ai_yared_course');
             }
             $trace = new job_trace($id);
+            // Preview first: the content is generated and kept as a draft; nothing is created in the course until
+            // the teacher approves it.
+            $preview = $useai && !empty($options['preview']);
             $topics = (array) ($options['topics'] ?? []);
             $total = count($topics);
 
@@ -79,7 +82,24 @@ class job_runner {
                         'current' => $number + 1, 'total' => $total, 'title' => $title]));
                     $input = self::build_input($options, $topic);
                     $builder = new course_builder($course, $client, $trace);
-                    $result = $useai ? $builder->create_topic($input) : $builder->create_empty_topic($input);
+                    if ($preview) {
+                        $parts = $builder->prepare_topic($input);
+                        $draftid = topic_draft::create((int) $job->userid, (int) $course->id, $input, $parts);
+                        $result = [
+                            'draft' => $draftid,
+                            'preview' => true,
+                            'items' => [],
+                            'sectionnum' => 0,
+                            'sectionid' => 0,
+                            'warnings' => array_values((array) $parts['warnings']),
+                            'hasvideo' => $parts['video'] !== null,
+                            'haspdf' => !empty($parts['haspdf']) || $parts['pdf'] !== null,
+                            'questions' => count((array) $parts['questions']),
+                            'categoryid' => 0,
+                        ] + (array) $parts['meta'];
+                    } else {
+                        $result = $useai ? $builder->create_topic($input) : $builder->create_empty_topic($input);
+                    }
                     $results[] = ['title' => $title, 'result' => $result, 'error' => null];
                     $success++;
                     usage_log::topic($course, (int) $job->userid, $title, (int) $input['age'], $result, '',
@@ -151,6 +171,7 @@ class job_runner {
             'createassign' => !empty($o['createassign']),
             'createpdf' => !empty($o['createpdf']),
             'createforum' => !empty($o['createforum']),
+            'createslides' => !empty($o['createslides']),
             'usesubsection' => !empty($o['usesubsection']),
             'subsectionmode' => in_array(($o['subsectionmode'] ?? ''), ['accordion', 'mosaic'], true)
                 ? $o['subsectionmode'] : '',

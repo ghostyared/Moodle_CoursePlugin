@@ -2,6 +2,11 @@
 
 All notable changes of `local_ai_yared_course`. Versions follow `release` in `version.php`.
 
+## 0.26.0 – 2026-11-03
+- Material Creator: **preview before publishing**. With the new option (on by default) the AI generates the topic and the teacher reviews it as the students will see it (activities, dates, hidden/visible), edits the texts and the questions, and only then creates it in the course. Drafts expire after 24 hours.
+- **Class presentation (slides):** the AI writes the slides of each topic (about 6 to 12 by age; figures drawn by the plugin for geometry/trigonometry). A link in the section opens a viewer with full screen, keyboard and swipe navigation, and teacher notes. Teachers can edit text and order, add or remove slides, and add free pictures from Wikimedia Commons with their credit. Students only see it while its activity is visible. Nothing is sent to external services except the optional picture search.
+- New option "Class presentation" in the topic form.
+
 ## 0.25.0 – 2026-11-02
 - Material Creator: the question bank of a topic is now mathematical (LaTeX formulas, numeric exercises and figures drawn by the plugin) when the topic is mathematics. The plugin detects it from the title and description (algebra, trigonometry, geometry, calculus, arithmetic, statistics, physics…); a new "Kind of questions" selector lets the teacher force general, or a specific mathematics course, for the whole batch. Available in the topic form and in the topic designer.
 - Warning when the MathJax/TeX filter is not active in the course.

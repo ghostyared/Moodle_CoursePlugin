@@ -63,6 +63,8 @@ class course_builder {
     protected $linknum = -1;
     /** @var bool Whether the topic was created as a subsection. */
     protected $usedsubsection = false;
+    /** @var array[]|null Modules recorded instead of created while a preview is built (null when creating for real). */
+    protected $preview = null;
 
     /**
      * Constructor.
@@ -79,27 +81,60 @@ class course_builder {
     }
 
     /**
-     * Generate everything and create it in the course.
+     * Fill the defaults of the input of a topic.
      *
-     * @param array $in title, description, age, language (code), languagename, sectionnum, findvideo, questioncount,
-     *     extensiontype (assign|quiz), hidesection.
-     * @return array sectionnum, sectionid, newsection, items, warnings, video, questions, categoryid,
-     *     provider, providername, model, profile.
-     * @throws \moodle_exception If the main content could not be generated.
+     * @param array $in Input.
+     * @return array
      */
-    public function create_topic(array $in): array {
+    protected function with_defaults(array $in): array {
         $in += ['findvideo' => 1, 'questioncount' => 0, 'extensiontype' => 'assign', 'hidesection' => 1,
             'sectionnum' => self::NEWSECTION, 'quizopen' => strtotime('today'), 'quizclosedays' => 7,
             'quiztimelimit' => 60, 'quizattempts' => 2, 'quizgrade' => 20, 'quizquestions' => 0,
-            'quizvisible' => 0, 'classdate' => 0,
+            'quizvisible' => 0, 'classdate' => 0, 'qkind' => 'auto', 'createslides' => 1,
             'createbank' => 1, 'createquiz' => 1, 'createassign' => 1, 'createpdf' => 1, 'createforum' => 1];
-        // Keep fallback warnings for this topic only.
-        $this->client->clear_fallback_messages();
         // The graded practice is always tied to the question bank: without a bank, or without questions,
         // there is nothing to link.
         if (empty($in['createbank']) || (int) $in['questioncount'] <= 0) {
             $in['createquiz'] = 0;
         }
+        return $in;
+    }
+
+    /**
+     * Ask the AI for everything the topic needs, without touching the course.
+     *
+     * The result can be shown to the teacher as a preview and later passed to create_topic().
+     *
+     * @param array $in Same input as create_topic().
+     * @return array overview, pdf (bytes or null), video (array or null), questions, mathcourse, warnings, meta.
+     * @throws \moodle_exception If the main content could not be generated.
+     */
+    public function prepare_topic(array $in): array {
+        $in = $this->with_defaults($in);
+        $this->client->clear_fallback_messages();
+        $this->warnings = [];
+        $parts = $this->generate_parts($in);
+        $fallbacks = $this->client->get_fallback_messages();
+        if ($fallbacks) {
+            $this->warnings[] = get_string('warn_fallback', 'local_ai_yared_course', s(implode(' | ', $fallbacks)));
+        }
+        $parts['warnings'] = $this->warnings;
+        $parts['meta'] = [
+            'provider' => $this->client->get_provider(),
+            'providername' => $this->client->get_provider_name(),
+            'model' => $this->client->get_model(),
+            'profile' => $this->client->get_active_profile_label(),
+        ];
+        return $parts;
+    }
+
+    /**
+     * Steps 1 to 3 plus the questions: every call to the AI and to YouTube.
+     *
+     * @param array $in Input with defaults.
+     * @return array overview, pdf, video, slides, questions, mathcourse.
+     */
+    protected function generate_parts(array $in): array {
         $title = $in['title'];
         $description = $in['description'];
         $age = (int) $in['age'];
@@ -114,8 +149,7 @@ class course_builder {
         // 2. Class handout (PDF).
         $this->log(get_string('step_pdf', 'local_ai_yared_course'));
         $pdf = null;
-        $createpdf = !empty($in['createpdf']);
-        if ($createpdf) {
+        if (!empty($in['createpdf'])) {
             try {
                 $content = $generator->generate_pdf($title, $description, $overview, $age, $langname);
                 $pdf = pdf_builder::build($title, $overview, $content, $age, $lang);
@@ -149,6 +183,72 @@ class course_builder {
             }
         }
 
+        // 3b. Class presentation (slides), editable by the teacher afterwards.
+        $slides = null;
+        if (!empty($in['createslides'])) {
+            $this->log(get_string('step_slides', 'local_ai_yared_course'));
+            try {
+                $mathkey = math_catalog::resolve((string) ($in['qkind'] ?? 'auto'), $title . ' ' . \core_text::substr($description, 0, 300));
+                $slides = $generator->generate_slides($title, $description, $overview, $age, $langname, $lang,
+                    $mathkey !== '' && math_catalog::uses_figures($mathkey));
+                if ($slides === null) {
+                    $this->warnings[] = get_string('warn_slides', 'local_ai_yared_course', get_string('error_badjson',
+                        'local_ai_yared_course'));
+                }
+            } catch (job_cancelled $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                $this->warnings[] = get_string('warn_slides', 'local_ai_yared_course', s($e->getMessage()));
+            }
+        }
+
+        // 4. Questions for the bank (optional), not saved yet.
+        $questions = [];
+        $mathcourse = '';
+        if (!empty($in['createbank']) && (int) $in['questioncount'] > 0) {
+            $this->log(get_string('step_questions', 'local_ai_yared_course'));
+            $set = $this->generate_question_set($title, $description, (int) $in['questioncount'], $age, $langname,
+                (string) ($in['qkind'] ?? 'auto'));
+            $questions = $set['questions'];
+            $mathcourse = $set['mathcourse'];
+        }
+
+        return ['overview' => $overview, 'pdf' => $pdf, 'video' => $video, 'slides' => $slides, 'questions' => $questions,
+            'mathcourse' => $mathcourse];
+    }
+
+    /**
+     * Generate everything and create it in the course.
+     *
+     * @param array $in title, description, age, language (code), languagename, sectionnum, findvideo, questioncount,
+     *     extensiontype (assign|quiz), hidesection.
+     * @param array|null $parts Content already generated and approved by the teacher (see prepare_topic()); when null
+     *     the AI is called now.
+     * @return array sectionnum, sectionid, newsection, items, warnings, video, questions, categoryid,
+     *     provider, providername, model, profile.
+     * @throws \moodle_exception If the main content could not be generated.
+     */
+    public function create_topic(array $in, ?array $parts = null): array {
+        $in = $this->with_defaults($in);
+        // Keep fallback warnings for this topic only.
+        $this->client->clear_fallback_messages();
+        $title = $in['title'];
+        $age = (int) $in['age'];
+        $lang = $in['language'];
+
+        // 1-3. Content: generated now, or taken from the approved preview.
+        if ($parts === null) {
+            $parts = $this->generate_parts($in);
+            $meta = null;
+        } else {
+            $this->warnings = array_merge($this->warnings, array_values((array) ($parts['warnings'] ?? [])));
+            $meta = $parts['meta'] ?? null;
+        }
+        $overview = $parts['overview'];
+        $pdf = $parts['pdf'];
+        $video = $parts['video'];
+        $createpdf = !empty($in['createpdf']);
+
         // 4. Section and activities.
         $this->log(get_string('step_build', 'local_ai_yared_course'));
         $newsection = ((int) $in['sectionnum'] === self::NEWSECTION);
@@ -158,6 +258,9 @@ class course_builder {
         $haspdf = $pdf !== null;
         $this->build_header($title, $overview, $age, $lang, (int) $in['classdate']);
         $this->build_video($title, $video, $age, $lang);
+        if (!empty($in['createslides']) && !empty($parts['slides']['slides'])) {
+            $this->build_slides($title, (array) $parts['slides'], $age, $lang);
+        }
         if ($createpdf) {
             $this->build_material($title, $pdf, $age, $lang);
         }
@@ -168,9 +271,9 @@ class course_builder {
         $questionids = [];
         $categoryid = 0;
         if (!empty($in['createbank']) && (int) $in['questioncount'] > 0) {
-            $this->log(get_string('step_questions', 'local_ai_yared_course'));
-            $generated = $this->generate_questions($title, $description, (int) $in['questioncount'], $age, $langname,
-                (string) ($in['qkind'] ?? 'auto'));
+            $this->log(get_string('step_questions_save', 'local_ai_yared_course'));
+            $generated = $this->save_questions($title, (array) $parts['questions'], (int) $in['questioncount'],
+                (string) ($parts['mathcourse'] ?? '') !== '');
             $created = $generated['created'];
             $questionids = $generated['ids'];
             $categoryid = $generated['categoryid'];
@@ -219,11 +322,46 @@ class course_builder {
             'hasvideo' => $hasvideo,
             'questions' => $created,
             'categoryid' => $categoryid,
-            'provider' => $this->client->get_provider(),
-            'providername' => $this->client->get_provider_name(),
-            'model' => $this->client->get_model(),
-            'profile' => $this->client->get_active_profile_label(),
+            'provider' => $meta['provider'] ?? $this->client->get_provider(),
+            'providername' => $meta['providername'] ?? $this->client->get_provider_name(),
+            'model' => $meta['model'] ?? $this->client->get_model(),
+            'profile' => $meta['profile'] ?? $this->client->get_active_profile_label(),
         ];
+    }
+
+    /**
+     * Build the list of activities the topic will have, exactly as they will be created, without creating anything.
+     *
+     * @param array $in Input of the topic.
+     * @param array $parts Generated content (see prepare_topic()).
+     * @return array[] Each: modname, name, intro (HTML), visible, extra (selected settings).
+     */
+    public function preview_topic(array $in, array $parts): array {
+        $in = $this->with_defaults($in);
+        $title = $in['title'];
+        $age = (int) $in['age'];
+        $lang = $in['language'];
+        $overview = $parts['overview'];
+        $savedwarnings = $this->warnings;
+        $this->preview = [];
+        try {
+            $this->build_header($title, $overview, $age, $lang, (int) $in['classdate']);
+            $this->build_video($title, $parts['video'], $age, $lang);
+            if (!empty($in['createslides']) && !empty($parts['slides']['slides'])) {
+                $this->build_slides($title, (array) $parts['slides'], $age, $lang);
+            }
+            if (!empty($in['createpdf'])) {
+                $this->build_material($title, $parts['pdf'], $age, $lang);
+            }
+            $this->build_practice($title, $overview, $in['extensiontype'], $age, $lang, [], $in, 0);
+            if (!empty($in['createforum'])) {
+                $this->build_forum($title, $overview, $age, $lang);
+            }
+            return $this->preview;
+        } finally {
+            $this->preview = null;
+            $this->warnings = $savedwarnings;
+        }
     }
 
     /**
@@ -441,6 +579,41 @@ class course_builder {
     }
 
     /**
+     * Class presentation block: heading and a link to the viewer of the plugin.
+     *
+     * The slides are stored in the course (see slides) so the teacher can edit them afterwards; nothing is sent out.
+     *
+     * @param string $title Topic title.
+     * @param array $deck Deck (see slides).
+     * @param int $age Age.
+     * @param string $lang Content language.
+     */
+    protected function build_slides(string $title, array $deck, int $age, string $lang): void {
+        $this->try_add('slides', function () use ($title, $deck, $age, $lang) {
+            $this->add_module('label', '', html_builder::block_heading(
+                strings::get('heading_slides', $lang), strings::get('slides_subtitle', $lang), $age), true);
+
+            $count = count((array) $deck['slides']);
+            $intro = html_builder::paragraph(strings::get('slides_intro', $lang, $count));
+            if ($this->preview !== null) {
+                $url = (new \moodle_url('/local/ai_yared_course/presentation.php'))->out(false);
+                $this->add_module('url', strings::get('slides_name', $lang, $title), $intro, true,
+                    ['externalurl' => $url, 'display' => RESOURCELIB_DISPLAY_NEW, 'printintro' => 1, 'showdescription' => 1]);
+                return;
+            }
+            $itemid = slides::new_itemid();
+            $deck['language'] = $lang;
+            slides::save($this->context, $itemid, $deck);
+            $url = slides::url((int) $this->course->id, $itemid)->out(false);
+            $created = $this->add_module('url', strings::get('slides_name', $lang, $title), $intro, true,
+                ['externalurl' => $url, 'display' => RESOURCELIB_DISPLAY_NEW, 'printintro' => 1, 'showdescription' => 1]);
+            // The viewer hides the presentation from students while this activity is hidden.
+            $deck['cmid'] = (int) $created->coursemodule;
+            slides::save($this->context, $itemid, $deck);
+        });
+    }
+
+    /**
      * Learning material block: heading and PDF (hidden placeholder file if the PDF could not be made).
      *
      * @param string $title Topic title.
@@ -461,15 +634,18 @@ class course_builder {
             }
             $filename = clean_filename(\core_text::substr($title, 0, 80)) . '.pdf';
 
-            $draftid = file_get_unused_draft_itemid();
-            get_file_storage()->create_file_from_string([
-                'contextid' => \context_user::instance($USER->id)->id,
-                'component' => 'user',
-                'filearea' => 'draft',
-                'itemid' => $draftid,
-                'filepath' => '/',
-                'filename' => $filename,
-            ], $pdf);
+            $draftid = 0;
+            if ($this->preview === null) {
+                $draftid = file_get_unused_draft_itemid();
+                get_file_storage()->create_file_from_string([
+                    'contextid' => \context_user::instance($USER->id)->id,
+                    'component' => 'user',
+                    'filearea' => 'draft',
+                    'itemid' => $draftid,
+                    'filepath' => '/',
+                    'filename' => $filename,
+                ], $pdf);
+            }
 
             $name = $found ? strings::get('pdf_name', $lang, $title) : strings::get('pdf_placeholder_name', $lang);
             $intro = html_builder::paragraph($found ? strings::get('pdf_intro', $lang)
@@ -612,6 +788,9 @@ class course_builder {
                 // Whole forum grading: Point type, maximum grade 20.
                 'grade_forum' => 20, 'grade_forum_notify' => 0, 'showdescription' => 1,
             ]);
+            if ($this->preview !== null) {
+                return;
+            }
             $this->post_forum_question((int) $created->instance, strings::get('forum_discussion_name', $lang, $title),
                 $question);
         });
@@ -683,6 +862,9 @@ class course_builder {
             $fields[$option . 'closed'] = 1;
         }
         $created = $this->add_module('quiz', $name, $intro, !empty($settings['visible']), $fields);
+        if ($this->preview !== null) {
+            return;
+        }
 
         if (!$questionids) {
             return;
@@ -742,7 +924,7 @@ class course_builder {
     }
 
     /**
-     * Generate questions with the AI and save them in a bank category named after the topic.
+     * Generate the questions of a topic with the AI (they are not saved).
      *
      * @param string $title Topic title.
      * @param string $description Topic description.
@@ -750,12 +932,10 @@ class course_builder {
      * @param int $age Age.
      * @param string $langname Language name.
      * @param string $qkind Kind of questions: auto (mathematics is detected from the topic), general, math or math:<course>.
-     * @return array ['created' => int, 'ids' => int[], 'categoryid' => int] Questions saved, their ids and the category.
+     * @return array questions (normalised) and mathcourse ('' for general questions).
      */
-    protected function generate_questions(string $title, string $description, int $count, int $age, string $langname,
+    protected function generate_question_set(string $title, string $description, int $count, int $age, string $langname,
             string $qkind = 'auto'): array {
-        global $DB;
-
         try {
             $topic = $title . ($description !== '' ? ' — ' . \core_text::substr($description, 0, 300) : '');
             // Mathematics topics (algebra, trigonometry...) get exercises with LaTeX and figures drawn by the plugin;
@@ -771,7 +951,33 @@ class course_builder {
             foreach ($generator->get_warnings() as $warning) {
                 $this->warnings[] = $warning;
             }
+            return ['questions' => array_values($questions), 'mathcourse' => $mathmode ? $mathcourse : ''];
+        } catch (job_cancelled $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->warnings[] = get_string('warn_questions', 'local_ai_yared_course', s($e->getMessage()));
+            return ['questions' => [], 'mathcourse' => ''];
+        }
+    }
 
+    /**
+     * Save generated questions in a bank category named after the topic.
+     *
+     * @param string $title Topic title.
+     * @param array[] $questions Normalised questions.
+     * @param int $count Number of questions that were requested.
+     * @param bool $mathmode Whether the questions use LaTeX.
+     * @return array ['created' => int, 'ids' => int[], 'categoryid' => int] Questions saved, their ids and the category.
+     */
+    protected function save_questions(string $title, array $questions, int $count, bool $mathmode): array {
+        global $DB;
+
+        try {
+            if (!$questions) {
+                $this->warnings[] = get_string('warn_questionsfewer', 'local_ai_yared_course',
+                    (object) ['created' => 0, 'requested' => $count]);
+                return ['created' => 0, 'ids' => [], 'categoryid' => 0];
+            }
             $name = \core_text::substr($title, 0, 255);
             $top = question_get_top_category($this->context->id, true);
             $existing = $DB->get_records('question_categories',
@@ -811,6 +1017,20 @@ class course_builder {
      */
     protected function add_module(string $modname, string $name, string $intro, bool $visible, array $fields = []) {
         global $DB;
+
+        if ($this->preview !== null) {
+            // Preview: record what would be created.
+            $extra = [];
+            foreach (['externalurl', 'timeopen', 'timeclose', 'timelimit', 'attempts', 'grade', 'duedate',
+                    'allowsubmissionsfromdate'] as $key) {
+                if (isset($fields[$key])) {
+                    $extra[$key] = $fields[$key];
+                }
+            }
+            $this->preview[] = ['modname' => $modname, 'name' => $name, 'intro' => $intro, 'visible' => $visible,
+                'extra' => $extra];
+            return (object) ['coursemodule' => 0, 'instance' => 0];
+        }
 
         $info = (object) ($fields + [
             'modulename' => $modname,

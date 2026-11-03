@@ -99,6 +99,8 @@ $createquiz = $issubmit ? optional_param('createquiz', 0, PARAM_INT) : 1;
 $createassign = $issubmit ? optional_param('createassign', 0, PARAM_INT) : 1;
 $createpdf = $issubmit ? optional_param('createpdf', 0, PARAM_INT) : 1;
 $createforum = $issubmit ? optional_param('createforum', 0, PARAM_INT) : 1;
+$createslides = $issubmit ? optional_param('createslides', 0, PARAM_INT) : 1;
+$preview = $issubmit ? optional_param('preview', 0, PARAM_INT) : 1;
 $subsupport = course_builder::subsection_support($course);
 $usesubsection = $issubmit ? optional_param('usesubsection', 0, PARAM_INT) : 1;
 if ($subsupport === 'flextiles') {
@@ -191,12 +193,14 @@ if ($issubmit && !$errors) {
         'sectionnum' => $sectionnum,
         'questioncount' => $questioncount,
         'qkind' => $qkind,
+        'preview' => !empty($preview),
         'findvideo' => !empty($findvideo),
         'createbank' => !empty($createbank),
         'createquiz' => !empty($createquiz),
         'createassign' => !empty($createassign),
         'createpdf' => !empty($createpdf),
         'createforum' => !empty($createforum),
+        'createslides' => !empty($createslides),
         'usesubsection' => $subsupport !== '' && !empty($usesubsection),
         'subsectionmode' => $subsupport === 'flextiles' ? $subsectionmode : '',
         'hidesection' => !empty($hidesection),
@@ -420,6 +424,8 @@ echo $rendercheckbox('createpdf', get_string('createpdf', 'local_ai_yared_course
     get_string('createpdf_desc', 'local_ai_yared_course'), !empty($createpdf));
 echo $rendercheckbox('findvideo', get_string('createvideo', 'local_ai_yared_course'),
     get_string('createvideo_desc', 'local_ai_yared_course'), !empty($findvideo));
+echo $rendercheckbox('createslides', get_string('createslides', 'local_ai_yared_course'),
+    get_string('createslides_desc', 'local_ai_yared_course'), !empty($createslides));
 echo $rendercheckbox('createbank', get_string('createbank', 'local_ai_yared_course'),
     get_string('createbank_desc', 'local_ai_yared_course'), !empty($createbank));
 echo html_writer::end_div();
@@ -432,6 +438,10 @@ echo $rendercheckbox('createforum', get_string('createforum', 'local_ai_yared_co
     get_string('createforum_desc', 'local_ai_yared_course'), !empty($createforum));
 echo html_writer::end_div();
 echo html_writer::end_div();
+
+// Preview first (recommended): nothing is created in the course until the teacher approves the generated content.
+echo $rendercheckbox('preview', get_string('preview_option', 'local_ai_yared_course'),
+    get_string('preview_option_desc', 'local_ai_yared_course'), !empty($preview));
 
 // Kind of questions for the bank: the plugin detects mathematics topics, and the teacher can force the kind.
 echo html_writer::start_div('row');

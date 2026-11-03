@@ -92,6 +92,29 @@ class job_report {
             }
 
             $result = $entry['result'];
+            if (!empty($result['draft'])) {
+                // Content generated and waiting for the teacher's approval: nothing exists in the course yet.
+                $table->data[] = [
+                    $index + 1,
+                    s($entry['title']),
+                    html_writer::span(!empty($result['profile']) ? s($result['profile']) : '—'),
+                    html_writer::link(new moodle_url('/local/ai_yared_course/topicpreview.php',
+                        ['id' => $course->id, 'draft' => (int) $result['draft']]),
+                        get_string('preview_open', 'local_ai_yared_course'), ['class' => 'btn btn-primary btn-sm']),
+                    $findvideo ? (!empty($result['hasvideo']) ? get_string('yes') : get_string('no')) : '—',
+                    $createpdf ? (!empty($result['haspdf']) ? get_string('yes') : get_string('no')) : '—',
+                    $createbank ? get_string('questions_short', 'local_ai_yared_course', (int) $result['questions']) : '—',
+                    '—',
+                    '—',
+                    '—',
+                    !empty($result['warnings'])
+                        ? html_writer::tag('details',
+                            html_writer::tag('summary', get_string('warnings_show', 'local_ai_yared_course',
+                                count($result['warnings']))) . html_writer::alist($result['warnings'], ['class' => 'mb-0 small']))
+                        : '—',
+                ];
+                continue;
+            }
             $sectionurl = course_get_url($course, $result['sectionnum']);
             $section = $sectionurl ? html_writer::link($sectionurl, get_string('gotosection', 'local_ai_yared_course'))
                 : s($result['sectionnum']);
@@ -160,7 +183,9 @@ class job_report {
         echo html_writer::table($table);
         echo html_writer::end_div();
 
-        if (!$createquiz) {
+        if (!$createquiz && !array_filter($results, function ($entry) {
+            return !empty($entry['result']['draft']);
+        })) {
             echo html_writer::tag('p', get_string('result_noquiz_note', 'local_ai_yared_course'), ['class' => 'text-muted']);
         }
         return ob_get_clean();

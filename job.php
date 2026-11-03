@@ -108,6 +108,10 @@ if ($finished) {
     }
     if ($job->status === job_store::CANCELLED) {
         echo $OUTPUT->notification(get_string('job_cancelled_note', 'local_ai_yared_course'), 'warning');
+    } else if ($job->status === job_store::DONE && !empty(job_store::options($job)['preview'])) {
+        echo $OUTPUT->notification(get_string('batch_preview_ready', 'local_ai_yared_course', (object) [
+            'done' => (int) $job->done, 'total' => (int) $job->total, 'failed' => (int) $job->failed]),
+            (int) $job->failed > 0 ? 'warning' : 'info');
     } else if ($job->status === job_store::DONE) {
         echo $OUTPUT->notification(get_string('batch_created', 'local_ai_yared_course', (object) [
             'done' => (int) $job->done, 'total' => (int) $job->total, 'failed' => (int) $job->failed]),

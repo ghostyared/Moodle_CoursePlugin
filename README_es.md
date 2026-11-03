@@ -51,6 +51,10 @@ Después poner `/opt/pymupdf/bin/python` en **Python para convertir PDFs**. Si e
 - **Estado de la conversión de PDF** (en los ajustes del plugin): debe decir «Listo» con las versiones de Python y PyMuPDF. Muestra también si detectó Docker o servidor normal y las instrucciones que corresponden.
 - Si un docente ve el aviso de conversión, el final trae un código: `pymupdf_not_installed` (falta PyMuPDF), `python` (no hay Python 3), `timeout` (servidor saturado), `open_failed` (PDF dañado). Los administradores ven además el detalle y el ambiente (`env=docker` o `env=host`).
 
+## Novedades 0.26.0 — Vista previa y presentación de la clase
+- **Vista previa antes de publicar:** en el Creador de Material la casilla «Ver una vista previa antes de crear el tema» (activa por defecto) hace que la IA genere el contenido y el docente lo revise como lo verá el estudiante, edite textos y preguntas y recién entonces pulse **Crear en el curso**. El borrador se borra solo a las 24 horas.
+- **Presentación de la clase:** la IA arma las diapositivas del tema (de 6 a 12 según la edad). Un enlace en la sección abre el visor (pantalla completa, flechas del teclado, deslizar en el celular, notas del docente). El docente puede **editar** textos y orden, agregar o quitar diapositivas y agregar imágenes libres de Wikimedia Commons con su crédito. Los estudiantes la ven solo mientras la actividad esté visible. Si se restaura una copia de seguridad en otro curso, la presentación debe generarse de nuevo.
+
 ## Novedades 0.24.0 — Imagen de referencia (Wikimedia Commons)
 En la pantalla «Revisar antes de guardar» (importación de PDF y generador) cada pregunta tiene el panel **Imagen de referencia (opcional)**: se buscan imágenes libres en Wikimedia Commons (la IA deduce qué buscar si se deja vacío), el docente elige una miniatura (se muestran autor y licencia) y **Procesar y reformular** adjunta la imagen y reformula la pregunta para que dependa de ella. El crédito se agrega a la retroalimentación al guardar. Ajuste de administrador: `imagesearch`. **Requisito:** salida HTTPS del servidor Moodle a `commons.wikimedia.org` y `upload.wikimedia.org`.
 

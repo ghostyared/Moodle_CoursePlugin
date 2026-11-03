@@ -465,5 +465,11 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110201, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110202) {
+        // 0.26.0: preview of the topic before it is created in the course (editable by the teacher), and an editable class
+        // presentation (slides) stored in the course file area. No schema change.
+        upgrade_plugin_savepoint(true, 2026110202, 'local', 'ai_yared_course');
+    }
+
     return true;
 }
