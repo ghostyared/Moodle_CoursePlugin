@@ -91,6 +91,7 @@ class topic_runner {
             'createassign' => 1,
             'createpdf' => 1,
             'createforum' => 1,
+            'createslides' => 1,
         ];
     }
 
@@ -135,6 +136,7 @@ class topic_runner {
             'createassign' => !empty($options['createassign']),
             'createpdf' => !empty($options['createpdf']),
             'createforum' => !empty($options['createforum']),
+            'createslides' => !empty($options['createslides']),
         ];
 
         $builder = new course_builder($course, $client, $trace);

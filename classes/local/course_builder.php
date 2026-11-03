@@ -92,7 +92,8 @@ class course_builder {
             'sectionnum' => self::NEWSECTION, 'quizopen' => strtotime('today'), 'quizclosedays' => 7,
             'quiztimelimit' => 60, 'quizattempts' => 2, 'quizgrade' => 20, 'quizquestions' => 0,
             'quizvisible' => 0, 'classdate' => 0,
-            'createbank' => 1, 'createquiz' => 1, 'createassign' => 1, 'createpdf' => 1, 'createforum' => 1];
+            'createbank' => 1, 'createquiz' => 1, 'createassign' => 1, 'createpdf' => 1, 'createforum' => 1,
+            'createslides' => 1];
         // Keep fallback warnings for this topic only.
         $this->client->clear_fallback_messages();
         // The graded practice is always tied to the question bank: without a bank, or without questions,
@@ -149,6 +150,26 @@ class course_builder {
             }
         }
 
+        // 3b. Class presentation (slides), editable by the teacher afterwards.
+        $slides = null;
+        if (!empty($in['createslides'])) {
+            $this->log(get_string('step_slides', 'local_ai_yared_course'));
+            try {
+                $mathkey = math_catalog::resolve((string) ($in['qkind'] ?? 'auto'),
+                    $title . ' ' . \core_text::substr($description, 0, 300));
+                $slides = $generator->generate_slides($title, $description, $overview, $age, $langname, $lang,
+                    $mathkey !== '' && math_catalog::uses_figures($mathkey));
+                if ($slides === null) {
+                    $this->warnings[] = get_string('warn_slides', 'local_ai_yared_course', get_string('error_badjson',
+                        'local_ai_yared_course'));
+                }
+            } catch (job_cancelled $e) {
+                throw $e;
+            } catch (\Throwable $e) {
+                $this->warnings[] = get_string('warn_slides', 'local_ai_yared_course', s($e->getMessage()));
+            }
+        }
+
         // 4. Section and activities.
         $this->log(get_string('step_build', 'local_ai_yared_course'));
         $newsection = ((int) $in['sectionnum'] === self::NEWSECTION);
@@ -158,6 +179,9 @@ class course_builder {
         $haspdf = $pdf !== null;
         $this->build_header($title, $overview, $age, $lang, (int) $in['classdate']);
         $this->build_video($title, $video, $age, $lang);
+        if (!empty($slides['slides'])) {
+            $this->build_slides($title, (array) $slides, $age, $lang);
+        }
         if ($createpdf) {
             $this->build_material($title, $pdf, $age, $lang);
         }
@@ -437,6 +461,43 @@ class course_builder {
                     'printintro' => 1];
             }
             $this->add_module('url', $name, $intro, $found, $extra + ['showdescription' => 1]);
+        });
+    }
+
+    /**
+     * Class presentation block: heading and a link to the viewer of the plugin.
+     *
+     * The slides are stored in the course (see slides) so the teacher can edit them afterwards.
+     *
+     * @param string $title Topic title.
+     * @param array $deck Deck (see slides).
+     * @param int $age Age.
+     * @param string $lang Content language.
+     */
+    protected function build_slides(string $title, array $deck, int $age, string $lang): void {
+        $this->try_add('slides', function () use ($title, $deck, $age, $lang) {
+            $this->add_module('label', '', html_builder::block_heading(
+                strings::get('heading_slides', $lang), strings::get('slides_subtitle', $lang), $age), true);
+            $count = count((array) $deck['slides']);
+            $intro = html_builder::paragraph(strings::get('slides_intro', $lang, $count));
+            $itemid = slides::new_itemid();
+            $deck['language'] = $lang;
+            // Free pictures from Wikimedia Commons, best effort: without them the slides show their icon.
+            try {
+                [$deck, $attached, $imgerror] = slides::attach_images($deck, $this->context, $itemid);
+                if ($imgerror !== '') {
+                    $this->warnings[] = get_string('warn_slides_images', 'local_ai_yared_course', s($imgerror));
+                }
+            } catch (\Throwable $e) {
+                $this->warnings[] = get_string('warn_slides_images', 'local_ai_yared_course', s($e->getMessage()));
+            }
+            slides::save($this->context, $itemid, $deck);
+            $url = slides::url((int) $this->course->id, $itemid)->out(false);
+            $created = $this->add_module('url', strings::get('slides_name', $lang, $title), $intro, true,
+                ['externalurl' => $url, 'display' => RESOURCELIB_DISPLAY_NEW, 'printintro' => 1, 'showdescription' => 1]);
+            // The viewer hides the presentation from students while this activity is hidden.
+            $deck['cmid'] = (int) $created->coursemodule;
+            slides::save($this->context, $itemid, $deck);
         });
     }
 

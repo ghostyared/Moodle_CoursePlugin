@@ -99,6 +99,7 @@ $createquiz = $issubmit ? optional_param('createquiz', 0, PARAM_INT) : 1;
 $createassign = $issubmit ? optional_param('createassign', 0, PARAM_INT) : 1;
 $createpdf = $issubmit ? optional_param('createpdf', 0, PARAM_INT) : 1;
 $createforum = $issubmit ? optional_param('createforum', 0, PARAM_INT) : 1;
+$createslides = $issubmit ? optional_param('createslides', 0, PARAM_INT) : 1;
 $subsupport = course_builder::subsection_support($course);
 $usesubsection = $issubmit ? optional_param('usesubsection', 0, PARAM_INT) : 1;
 if ($subsupport === 'flextiles') {
@@ -197,6 +198,7 @@ if ($issubmit && !$errors) {
         'createassign' => !empty($createassign),
         'createpdf' => !empty($createpdf),
         'createforum' => !empty($createforum),
+        'createslides' => !empty($createslides),
         'usesubsection' => $subsupport !== '' && !empty($usesubsection),
         'subsectionmode' => $subsupport === 'flextiles' ? $subsectionmode : '',
         'hidesection' => !empty($hidesection),
@@ -430,6 +432,8 @@ echo $rendercheckbox('createassign', get_string('createassign', 'local_ai_yared_
     get_string('createassign_desc', 'local_ai_yared_course'), !empty($createassign));
 echo $rendercheckbox('createforum', get_string('createforum', 'local_ai_yared_course'),
     get_string('createforum_desc', 'local_ai_yared_course'), !empty($createforum));
+echo $rendercheckbox('createslides', get_string('createslides', 'local_ai_yared_course'),
+    get_string('createslides_desc', 'local_ai_yared_course'), !empty($createslides));
 echo html_writer::end_div();
 echo html_writer::end_div();
 

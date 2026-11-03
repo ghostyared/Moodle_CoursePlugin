@@ -151,6 +151,7 @@ class job_runner {
             'createassign' => !empty($o['createassign']),
             'createpdf' => !empty($o['createpdf']),
             'createforum' => !empty($o['createforum']),
+            'createslides' => !empty($o['createslides']),
             'usesubsection' => !empty($o['usesubsection']),
             'subsectionmode' => in_array(($o['subsectionmode'] ?? ''), ['accordion', 'mosaic'], true)
                 ? $o['subsectionmode'] : '',

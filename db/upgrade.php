@@ -465,5 +465,11 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110201, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110301) {
+        // 0.27.0: class presentation (slides) with pictures: automatic Wikimedia Commons pictures, slide icons, own picture
+        // upload and a status check. Decks live in the course file area. No schema change.
+        upgrade_plugin_savepoint(true, 2026110301, 'local', 'ai_yared_course');
+    }
+
     return true;
 }
