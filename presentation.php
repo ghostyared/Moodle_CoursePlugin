@@ -60,10 +60,30 @@ $imageurl = function (string $file) use ($context, $itemid): string {
     return slides::image_url($context, $itemid, $file);
 };
 
+// Download as PowerPoint (opens in PowerPoint, Google Slides and LibreOffice).
+if ($action === 'pptx') {
+    $content = \local_ai_yared_course\local\pptx_export::build($deck, function (string $file) use ($context, $itemid): string {
+        return slides::image_bytes($context, $itemid, $file);
+    });
+    $name = clean_filename(preg_replace('/\s+/u', '_', $title) ?: 'presentacion') . '.pptx';
+    send_file($content, $name, 0, 0, true, true,
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation');
+    exit;
+}
+
 // Save the edits (or add a blank slide).
 if ($edit && $canedit && ($action === 'save' || $action === 'add')) {
     require_sesskey();
-    $deck = slides::apply_edits($deck, optional_param_array('aiys', [], PARAM_RAW), $action === 'add');
+    // Flat field names (aiys_<n>_<field>): optional_param_array() cannot read nested arrays.
+    $posted = [];
+    foreach (array_keys((array) $deck['slides']) as $i) {
+        $row = [];
+        foreach (['keep', 'order', 'layout', 'title', 'text', 'bullets', 'notes', 'emoji', 'image_query'] as $field) {
+            $row[$field] = optional_param("aiys_{$i}_{$field}", '', PARAM_RAW);
+        }
+        $posted[$i] = $row;
+    }
+    $deck = slides::apply_edits($deck, $posted, $action === 'add');
     $newtitle = trim(optional_param('deck_title', '', PARAM_TEXT));
     if ($newtitle !== '') {
         $deck['title'] = slides::clean($newtitle, 150);
@@ -78,20 +98,23 @@ if ($edit && $canedit && ($action === 'save' || $action === 'add')) {
 echo $OUTPUT->header();
 echo $OUTPUT->heading(s($title));
 
-$tabs = '';
+$pptxlink = html_writer::link(new moodle_url($url, ['action' => 'pptx', 'edit' => 0]),
+    '⬇ ' . get_string('presentation_pptx', 'local_ai_yared_course'), ['class' => 'btn btn-outline-primary btn-sm ms-auto']);
+$tabs = html_writer::div($pptxlink, 'd-flex gap-2 mb-3');
 if ($canedit) {
     $tabs = html_writer::div(
         html_writer::link(slides::url((int) $course->id, $itemid), get_string('presentation_view', 'local_ai_yared_course'),
             ['class' => 'btn btn-' . ($edit ? 'outline-secondary' : 'secondary') . ' btn-sm']) .
         html_writer::link(slides::url((int) $course->id, $itemid, true),
             get_string('presentation_edit', 'local_ai_yared_course'),
-            ['class' => 'btn btn-' . ($edit ? 'secondary' : 'outline-secondary') . ' btn-sm']),
+            ['class' => 'btn btn-' . ($edit ? 'secondary' : 'outline-secondary') . ' btn-sm']) . $pptxlink,
         'd-flex gap-2 mb-3');
 }
 echo $tabs;
 
 if (!$edit || !$canedit) {
     echo html_writer::div(get_string('presentation_help', 'local_ai_yared_course'), 'text-muted small mb-2');
+    echo html_writer::div(get_string('presentation_pptx_help', 'local_ai_yared_course'), 'text-muted small mb-2');
     echo slides::render_viewer($deck, $imageurl);
     if ($canedit) {
         echo html_writer::div(html_writer::tag('strong', get_string('presentation_notes', 'local_ai_yared_course') . ': ') .

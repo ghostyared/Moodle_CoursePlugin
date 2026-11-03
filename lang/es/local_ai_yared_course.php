@@ -966,3 +966,5 @@ $string['commonscheck_name'] = 'Yared.AI: búsqueda de imágenes (Wikimedia Comm
 $string['commonscheck_ok'] = 'El servidor de Moodle puede consultar Wikimedia Commons.';
 $string['commonscheck_fail'] = 'El servidor de Moodle no puede consultar Wikimedia Commons: {$a}. Las diapositivas usarán íconos y los docentes podrán subir sus propias imágenes. Para habilitar la búsqueda, permita la salida HTTPS a commons.wikimedia.org y upload.wikimedia.org.';
 $string['commonscheck_off'] = 'La búsqueda de imágenes está desactivada en la configuración del plugin.';
+$string['presentation_pptx'] = 'Descargar en PowerPoint (.pptx)';
+$string['presentation_pptx_help'] = 'El archivo .pptx se puede editar en PowerPoint, en Google Slides (Archivo > Importar diapositivas) o en LibreOffice. Las figuras dibujadas por el plugin no se incluyen.';

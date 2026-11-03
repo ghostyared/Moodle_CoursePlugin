@@ -385,6 +385,20 @@ class slides {
     }
 
     /**
+     * Bytes of a picture of a deck.
+     *
+     * @param \context $context Course context.
+     * @param int $itemid Deck id.
+     * @param string $filename File name.
+     * @return string Bytes, or '' when the file does not exist.
+     */
+    public static function image_bytes(\context $context, int $itemid, string $filename): string {
+        $file = get_file_storage()->get_file($context->id, 'local_ai_yared_course', self::AREA, $itemid, '/',
+            clean_filename($filename));
+        return $file ? (string) $file->get_content() : '';
+    }
+
+    /**
      * Delete the pictures that the deck no longer uses.
      *
      * @param \context $context Course context.
@@ -567,7 +581,7 @@ JS;
         $html = '';
         foreach (array_values((array) ($deck['slides'] ?? [])) as $i => $slide) {
             $name = function (string $field) use ($i): string {
-                return "aiys[$i][$field]";
+                return "aiys_{$i}_{$field}";
             };
             $field = function (string $field, string $label, string $control) use ($i): string {
                 return \html_writer::div(\html_writer::label($label, "aiyared-s$i-$field", false,

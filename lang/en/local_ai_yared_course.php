@@ -966,3 +966,5 @@ $string['commonscheck_name'] = 'Yared.AI: picture search (Wikimedia Commons)';
 $string['commonscheck_ok'] = 'The Moodle server can reach Wikimedia Commons.';
 $string['commonscheck_fail'] = 'The Moodle server cannot reach Wikimedia Commons: {$a}. Slides will use icons and teachers can upload their own pictures. To enable the search, allow outgoing HTTPS to commons.wikimedia.org and upload.wikimedia.org.';
 $string['commonscheck_off'] = 'Picture search is turned off in the plugin settings.';
+$string['presentation_pptx'] = 'Download as PowerPoint (.pptx)';
+$string['presentation_pptx_help'] = 'The .pptx file can be edited in PowerPoint, Google Slides (File > Import slides) or LibreOffice. Figures drawn by the plugin are not included.';

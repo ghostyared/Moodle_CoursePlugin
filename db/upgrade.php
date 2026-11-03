@@ -471,5 +471,10 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110301, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110302) {
+        // 0.28.0: PowerPoint (.pptx) export of the class presentation; fix of the slide editor form. No schema change.
+        upgrade_plugin_savepoint(true, 2026110302, 'local', 'ai_yared_course');
+    }
+
     return true;
 }
