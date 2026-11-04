@@ -482,5 +482,10 @@ function xmldb_local_ai_yared_course_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026110303, 'local', 'ai_yared_course');
     }
 
+    if ($oldversion < 2026110304) {
+        // 0.29.1: fix of the empty "Question type" list in the mathematics mode. No schema change.
+        upgrade_plugin_savepoint(true, 2026110304, 'local', 'ai_yared_course');
+    }
+
     return true;
 }

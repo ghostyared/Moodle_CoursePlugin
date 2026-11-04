@@ -154,7 +154,8 @@ class generate_form extends \moodleform {
                 ],
             ];
         }
-        $mform->addElement('selectgroups', 'qtype', get_string('qtype', 'local_ai_yared_course'), $types);
+        // Mathematics offers a flat list; the other mode groups the formats (a flat list in "selectgroups" renders empty).
+        $mform->addElement($mathmode ? 'select' : 'selectgroups', 'qtype', get_string('qtype', 'local_ai_yared_course'), $types);
         $mform->setDefault('qtype', 'multichoice');
         $mform->addHelpButton('qtype', 'qtype', 'local_ai_yared_course');
 

@@ -2,6 +2,9 @@
 
 All notable changes of `local_ai_yared_course`. Versions follow `release` in `version.php`.
 
+## 0.29.1 – 2026-11-03
+- Fix: in "Mathematics with LaTeX" the "Question type" list was empty (a flat list was given to a grouped select), so generating failed with "Argument #5 ($qtype) must be of type string, null given". The list now shows multiple choice, true/false and mixed, and the server falls back to multiple choice.
+
 ## 0.29.0 – 2026-11-03
 - Class presentation is now a PowerPoint file (.pptx) published in the topic as an ordinary file resource. The built-in slide viewer and editor (and its page, AJAX endpoint and file area) were removed: teachers download, edit and replace the file with PowerPoint, Microsoft 365 or Google Slides, or upload their own presentation in the activity settings.
 - The file keeps the slide text, notes, icons and Wikimedia Commons pictures (with credit). Figures drawn for mathematics topics are not included in slides.

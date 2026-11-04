@@ -191,7 +191,8 @@ if ($data = $mform->get_data()) {
 
         $trace->output(get_string('bank_generating_ai', 'local_ai_yared_course'));
         $generator = new question_generator($client, $client->get_batchsize(), $mathmode, $allowimages);
-        $questions = $generator->generate($topics, $stems, $total, $age, $data->qtype, $language, $instructions);
+        $qtype = (string) ($data->qtype ?? '') ?: 'multichoice';
+        $questions = $generator->generate($topics, $stems, $total, $age, $qtype, $language, $instructions);
         if (empty($questions)) {
             throw new moodle_exception('error_noquestions', 'local_ai_yared_course');
         }
@@ -219,7 +220,7 @@ if ($data = $mform->get_data()) {
                 'topics' => $topics,
                 'age' => $age,
                 'language' => $language,
-                'qtype' => $data->qtype,
+                'qtype' => (string) ($data->qtype ?? 'multichoice') ?: 'multichoice',
                 'instructions' => $instructions,
                 'mathmode' => $mathmode,
                 'allowfigures' => $allowimages,
